@@ -253,7 +253,13 @@ Class Exif {
     if (!in_array(strtolower($this->getFileType($file)), $ar_supported_types)) {
       return array();
     }
-    $exif = exif_read_data($file, 0,$enable_sections);
+    $exif = array();
+    try {
+      $exif = exif_read_data($file, 0,$enable_sections);
+    }  catch (Exception $e) {
+      watchdog(WATCHDOG_WARNING, t("Error while reading EXIF tags from image." . $e->getMessage()));
+    }
+
     $arSmallExif = array();
     foreach ((array)$exif as $key1 => $value1) {
 
