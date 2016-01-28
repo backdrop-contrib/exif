@@ -997,6 +997,7 @@ Class Exif {
       $xmp_keys[$current_value] = $current_value;
     }
     $fields = array_merge($exif_keys,$iptc_keys,$xmp_keys);
+    ksort($fields);
     return $fields;
   }
 
