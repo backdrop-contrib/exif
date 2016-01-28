@@ -292,7 +292,7 @@ Class Exif {
    */
   public function readIPTCTags($file, $enable_sections) {
     $humanReadableKey = $this->getHumanReadableIPTCkey();
-    $size = GetImageSize ($file, $infoImage);
+    $size = GetImageSize ($file);
     $iptc = empty($infoImage["APP13"]) ? array() : iptcparse($infoImage["APP13"]);
     $arSmallIPTC = array();
     if (is_array($iptc)) {

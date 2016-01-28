@@ -102,6 +102,9 @@ function _exif_node_insert_update($object_type,$object) {
       && array_key_exists($key,$metadata_image_fields[$metadata_field_descriptor['image_field']][$section])
       ) {
         $value=$metadata_image_fields[$metadata_field_descriptor['image_field']][$section][$key];
+        if (is_string($value) &&  isset($metadata_field_descriptor['metadata_field_separator'])) {
+           $value=explode($metadata_field_descriptor['metadata_field_separator'],$value);
+        }
       } else {
         $value=NULL;
       }
@@ -485,6 +488,7 @@ function exif_field_widget_info() {
       'settings' => array(
         'image_field' => '',
         'exif_field' => '',
+        'exif_field_separator' => ''
       ),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
@@ -542,6 +546,13 @@ function exif_field_widget_settings_form($field, $instance) {
       '#options' => array_merge(array('naming_convention' => 'name of the field is the exif field name'),$exif_fields),
       '#default_value' => $default_exif_value,
       '#element_validate' => array('_exif_field_widget_exif_field_validate'),    
+    );
+    $form['exif_field_separator'] = array(
+        '#type' => 'textfield',
+        '#title' => t('exif field separator'),
+        '#description' => t('separator used to split values (if field definition support several values). let it empty if you do not want to split values.'),
+        '#default_value' => '',
+        '#element_validate' => array('_exif_field_widget_exif_field_separator_validate'),
     );
   }
   return $form;
@@ -636,6 +647,16 @@ function _exif_field_widget_exif_field_validate($element, &$form_state) {
   }
 }
 
+/**
+ * implementation of #element_validate FAPI Hook
+ */
+function _exif_field_widget_exif_field_separator_validate($element, &$form_state) {
+  $exif_field_settings = $form_state['values']['instance']['widget']['settings']['exif_field_separator'];
+  if (!empty($exif_field_settings) && strlen($exif_field_settings)>1) {
+    form_error($element, t('the separator is only one character long.'));
+  }
+}
+
 function _exif_filter_fields_on_widgets($fields_of_bundle) {
   $result=array();
   foreach ($fields_of_bundle as $key => $value) {
@@ -647,6 +668,9 @@ function _exif_filter_fields_on_widgets($fields_of_bundle) {
         $name=$value['widget']['settings']['exif_field'];
       }
       $element['metadata_field']=$name;
+      if (isset($value['widget']['settings']['exif_field_separator']) && !empty($value['widget']['settings']['exif_field_separator'])) {
+        $element['metadata_field_separator']=$value['widget']['settings']['exif_field_separator'];
+      }
       if (!isset($value['widget']['settings']['image_field']) && isset($value['widget']['settings']['media_generic'])) {
         $element['image_field']=$value['widget']['settings']['media_generic'];
       } else {
