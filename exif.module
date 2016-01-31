@@ -517,7 +517,8 @@ function exif_field_widget_settings_form($field, $instance) {
   $form = array();
   if ($widget['type'] == 'exif_readonly') {
     $exif_fields = _exif_field_widget_retreive_exif_fields();
-    $default_exif_value = _exif_get_field_widget_retreive_exif_field_default_value($widget,$exif_fields);
+    $default_exif_value = _exif_get_field_widget_retreive_exif_field_default_value($widget);
+    $default_exif_separator_value = _exif_get_field_widget_retreive_exif_field_separator_default_value($widget);
     if ($instance['entity_type'] == 'node') {
       $image_fields = _exif_field_widget_retreive_image_field_from_bundle($instance['entity_type'],$instance['bundle']);
       $default_image_value = _exif_get_field_widget_retreive_image_field_default_value($widget,$image_fields);
@@ -549,7 +550,7 @@ function exif_field_widget_settings_form($field, $instance) {
         '#type' => 'textfield',
         '#title' => t('exif field separator'),
         '#description' => t('separator used to split values (if field definition support several values). let it empty if you do not want to split values.'),
-        '#default_value' => '',
+        '#default_value' => $default_exif_separator_value,
         '#element_validate' => array('_exif_field_widget_exif_field_separator_validate'),
     );
   }
@@ -577,10 +578,23 @@ function _exif_get_field_widget_retreive_image_field_default_value($widget,$imag
  * @param $widget
  * @param $image_fields
  */
-function _exif_get_field_widget_retreive_exif_field_default_value($widget,$exif_fields) {
+function _exif_get_field_widget_retreive_exif_field_default_value($widget) {
   $result = $widget['settings']['exif_field'];
   if ( empty($result) ) {
     $result='naming_convention';
+  }
+  return $result;
+};
+
+/**
+ * calculate default value for settings form (more precisely exif_field_separator setting) of widget.
+ * @param $widget
+ * @param $image_fields
+ */
+function _exif_get_field_widget_retreive_exif_field_separator_default_value($widget) {
+  $result = $widget['settings']['exif_field_separator'];
+  if ( empty($result) ) {
+    $result='';
   }
   return $result;
 };
