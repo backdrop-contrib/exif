@@ -200,7 +200,7 @@ function _exif_handle_field($index,$language,$field_type,&$field_data,$exif_sect
   $field=field_info_field($field_type['field_name']);
   if ($field['module']=='text') {
     _exif_handle_text_field($index,$language,$field,$field_type,$field_data,$exif_section,$exif_name,$exif_value);
-  } else if ($field['module']=='taxonomy') {
+  } else if ($field['module']=='taxonomy' || $field['module']=='i18n_taxonomy' ) {
     _exif_handle_taxonomy_field($index,$language,$field,$field_type,$field_data,$exif_section,$exif_name,$exif_value);
   } else if ($field['module']=='date') {
     _exif_handle_date_field($index,$language,$field,$field_type,$field_data,$exif_section,$exif_name,$exif_value);
