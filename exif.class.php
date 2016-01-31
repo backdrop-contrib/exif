@@ -49,6 +49,10 @@ Class Exif {
         $section = $ar[0];
         unset($ar[0]);
         $arCckFields[$drupal_field]['metadata_field'] =  array('section'=>$section, 'tag'=>implode("_", $ar));
+      } else {
+        //remove from the list a non usable description.
+        unset($arCckFields[$drupal_field]);
+        watchdog(WATCHDOG_WARNING, t("not able to understand exif field settings " . $metadata_field));
       }
     }
     return $arCckFields;
