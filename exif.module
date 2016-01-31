@@ -257,30 +257,28 @@ function _exif_handle_date_field($index,$language,$field,$field_type,&$field_dat
  * handle taxonomy field.
  * @param $terms
  * @param $field_data
- * @return unknown_type
  */
 function _exif_handle_taxonomy_field($index,$language,$field,$field_type,&$field_data,$exif_section,$exif_name,$exif_value)  {
   //TODO : check if the vocabulary is the same as the field
   //look for the term
   if (!drupal_validate_utf8($exif_value)) {
     $exif_value=check_plain(utf8_encode($exif_value));
-  }  
-  $terms = taxonomy_get_term_by_name($exif_value);
-  if (is_array($terms) && count($terms)>0) {
-    $term = array_shift($terms);
-    $field_data[$language][$index]['tid'] = $term->tid;
-  } else{
-    //TODO: make auto-creation optional even if vocabulary exist.
-    // if not exist, create it
-    //store full metadata in vocabulary
-    $vocabularies = taxonomy_get_vocabularies();
-    $chosen_vocabulary = variable_get('exif_vocabulary',0);
-    if ($chosen_vocabulary != 0) {
-      $terms = taxonomy_get_term_by_name($exif_name);
+  }
+  $chosen_vocabulary = variable_get('exif_vocabulary',0);
+  if ($chosen_vocabulary != 0) {
+    $terms = taxonomy_get_term_by_name($exif_value,$chosen_vocabulary);
+    if (is_array($terms) && count($terms)>0) {
+      $term = array_shift($terms);
+      $field_data[$language][$index]['tid'] = $term->tid;
+    } else {
+      //TODO: make auto-creation optional even if vocabulary exist.
+      // if not exist, create it
+      //store full metadata in vocabulary
+      $terms = taxonomy_get_term_by_name($exif_name,$chosen_vocabulary);
       if (is_array($terms) && count($terms)>0) {
         $parent_term = array_shift($terms);
       } else {
-        $terms = taxonomy_get_term_by_name($exif_section);
+        $terms = taxonomy_get_term_by_name($exif_section,$chosen_vocabulary);
         if (is_array($terms) && count($terms)>0) {
           $section_term = array_shift($terms);
         } else {
@@ -301,7 +299,7 @@ function _exif_handle_taxonomy_field($index,$language,$field,$field_type,&$field
  * @param $vid
  * @param $name
  * @param $parent_term
- * @return unknown_type
+ * @return stdClass the newly created term
  */
 function _exif_create_term($vid,$name,$parent_term = 0) {
   $term = new stdClass();
