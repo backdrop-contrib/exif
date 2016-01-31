@@ -264,8 +264,8 @@ function _exif_handle_taxonomy_field($index,$language,$field,$field_type,&$field
   if (!drupal_validate_utf8($exif_value)) {
     $exif_value=check_plain(utf8_encode($exif_value));
   }
-  $chosen_vocabulary = variable_get('exif_vocabulary',0);
-  if ($chosen_vocabulary != 0) {
+  $chosen_vocabulary = $field['settings']['allowed_values'][0]['vocabulary'];
+  if (isset($chosen_vocabulary)) {
     $terms = taxonomy_get_term_by_name($exif_value,$chosen_vocabulary);
     if (is_array($terms) && count($terms)>0) {
       $term = array_shift($terms);
