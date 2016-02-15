@@ -81,9 +81,12 @@ Class Exif {
             break;
         }
       } else {
-	if (!drupal_validate_utf8($value)) {
-	    $value=utf8_encode($value);
-	}
+        if (is_string($value)) {
+          $value=trim($value);
+        }
+        if (!drupal_validate_utf8($value)) {
+            $value=utf8_encode($value);
+        }
         switch ($key) {
           // String values.
           case 'usercomment':
