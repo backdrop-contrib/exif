@@ -178,9 +178,12 @@ Class Exif {
        // Value < 1
        if ($top == 1) {
          $value = '1/' . $bottom;
-       }
-       else {
-         $value = '1/' . round(($bottom / $top) ,0);
+       } else {
+         if ($top != 0) {
+          $value = '1/' . round(($bottom / $top), 0);
+         } else {
+          $value = '0';
+         }
        }
      }
      return $value;
