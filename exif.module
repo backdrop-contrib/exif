@@ -1,5 +1,6 @@
 <?php
 // $Id:
+include_once drupal_get_path('module', 'exif') .'/ExifInterface.php';
 
 /**
  * @author: Jean-Philippe Hautin
@@ -419,8 +420,8 @@ function _exif_get_image_fid($field,$language) {
  * @return Exif
  */
 function _exif_get_class() {
-  include_once drupal_get_path('module', 'exif') .'/exif.class.php';
-  $exif = Exif::getInstance();
+  include_once drupal_get_path('module', 'exif') .'/ExifFactory.php';
+  $exif = \Drupal\exif\ExifFactory::getExifInterface();
   return $exif;
 }
 
