@@ -133,6 +133,9 @@ Class ExifPHPExtension implements ExifInterface {
           // GPS values.
           case 'gpsaltitude':
           case 'gpsimgdirection':
+            if (!isset($data[$key . 'ref'])) {
+              $data[$key . 'ref'] = 0;
+            }
             $value = $this->_exif_reformat_DMS2D($value, $data[$key . 'ref']);
             break;
           // Flash values.
