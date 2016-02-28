@@ -129,7 +129,7 @@ function exif_admin_settings_form() {
     '#description' => t('Select nodetypes which should be checked for itpc & exif data. In case the nodetypes contains more than one image field, the module will use the first one.'),
   );
 
-  if (module_exists("media")) {
+  if (module_exists("file_entity")) {
     $all_mt = array();
     // Setup media types
     if (function_exists('file_type_get_enabled_types')) {
