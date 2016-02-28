@@ -318,8 +318,12 @@ function _exif_create_term($vid,$name,$parent_term = 0) {
  *
  */
 function exif_field_attach_presave($obj_type, $object) {
-  if (($obj_type == 'node' || $obj_type == 'file') && variable_get('exif_update', TRUE)) {
-    _exif_node_insert_update($obj_type,$object);
+  if ($obj_type == 'node' || $obj_type == 'file') {
+    $inserting = !isset($object->original);
+    $shouldUpdateMetadata = variable_get('exif_update', TRUE);
+    if ($inserting || $shouldUpdateMetadata) {
+      _exif_node_insert_update($obj_type, $object);
+    }
   }
 }
 
