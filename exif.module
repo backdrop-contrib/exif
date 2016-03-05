@@ -267,29 +267,33 @@ function _exif_handle_taxonomy_field($index,$language,$field,$field_type,&$field
   }
   $chosen_vocabulary = $field['settings']['allowed_values'][0]['vocabulary'];
   if (isset($chosen_vocabulary)) {
-    $terms = taxonomy_get_term_by_name($exif_value,$chosen_vocabulary);
-    if (is_array($terms) && count($terms)>0) {
-      $term = array_shift($terms);
-      $field_data[$language][$index]['tid'] = $term->tid;
-    } else {
-      //TODO: make auto-creation optional even if vocabulary exist.
-      // if not exist, create it
-      //store full metadata in vocabulary
-      $terms = taxonomy_get_term_by_name($exif_name,$chosen_vocabulary);
+    $vocabularies = taxonomy_vocabulary_get_names();
+    if (is_array($vocabularies) && isset($vocabularies[$chosen_vocabulary])) {
+      $vocabulary = $vocabularies[$chosen_vocabulary];
+      $terms = taxonomy_get_term_by_name($exif_value,$chosen_vocabulary);
       if (is_array($terms) && count($terms)>0) {
-        $parent_term = array_shift($terms);
-      } else {
-        $terms = taxonomy_get_term_by_name($exif_section,$chosen_vocabulary);
-        if (is_array($terms) && count($terms)>0) {
-          $section_term = array_shift($terms);
-        } else {
-          $section_term = _exif_create_term($chosen_vocabulary,$exif_section);
-        }
-        $parent_term = _exif_create_term($chosen_vocabulary,$exif_name,$section_term->tid);
-      }
-      $term = _exif_create_term($chosen_vocabulary,$exif_value,$parent_term->tid);
-      if (isset($term->tid)) {
+        $term = array_shift($terms);
         $field_data[$language][$index]['tid'] = $term->tid;
+      } else {
+        //TODO: make auto-creation optional even if vocabulary exist.
+        // if not exist, create it
+        //store full metadata in vocabulary
+        $terms = taxonomy_get_term_by_name($exif_name,$chosen_vocabulary);
+        if (is_array($terms) && count($terms)>0) {
+          $parent_term = array_shift($terms);
+        } else {
+          $terms = taxonomy_get_term_by_name($exif_section,$chosen_vocabulary);
+          if (is_array($terms) && count($terms)>0) {
+            $section_term = array_shift($terms);
+          } else {
+            $section_term = _exif_create_term($vocabulary->vid,$exif_section);
+          }
+          $parent_term = _exif_create_term($vocabulary->vid,$exif_name,$section_term->tid);
+        }
+        $term = _exif_create_term($vocabulary->vid,$exif_value,$parent_term->tid);
+        if (isset($term->tid)) {
+          $field_data[$language][$index]['tid'] = $term->tid;
+        }
       }
     }
   }
