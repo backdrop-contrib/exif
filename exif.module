@@ -440,53 +440,6 @@ function _exif_get_class() {
   return $exif;
 }
 
-/**
- * Implementation of hook_token_list
- * @param array $type
- */
-//function fast_gallery_token_list($type = 'node') {
-//  if ($type == 'node') {
-//    $exif = _exif_get_class();
-//    $ar_iptc = $exif->getHumanReadableIPTCkey();
-//    foreach ($ar_iptc as $iptc) {
-//      $tokens['iptc']['iptc_' . $iptc] = 'IPTC Field: ' . $iptc;
-//    }
-//    return $tokens;
-//  }
-//}
-
-/**
- * implementation of hook_token_values
- * @param unknown_type $type
- * @param unknown_type $object
- * @param unknown_type $options
- */
-//function fast_gallery_token_values($type, $object = NULL, $options = array()) {
-//  if ($type == 'node') {
-//    $node = $object;
-//    $exif = _exif_get_class();
-//    $ar_iptc = $exif->getHumanReadableIPTCkey();
-//
-//    $info = content_types($node->type);
-//    $fields = $info['fields'];
-//    //get the path to the image
-//    $image_path = _exif_get_image_path($fields, $node);
-//
-//    dsm("start reading");
-//    $iptc_values = $exif->readIPTCTags($image_path, array(), array('style' => 'fullSmall'));
-//    dsm($iptc_values);
-//
-//    // TODO: needs to be finished
-//    foreach ($iptc_values as $key => $iptc) {
-//      $tokens['iptc_' . $key] = 'IPTC Field: ' . utf8_encode($iptc);
-//    }
-//    dsm($tokens);
-//    return $tokens;
-//  }
-//}
-
-
-
 //
 // NEW VERSION FOR CONFIGURING FIELD. USING NEW FIELD WIDGET API.
 //

@@ -6,10 +6,12 @@ version = "7.x-1.x-dev"
 dependencies[] = taxonomy
 dependencies[] = image
 files[]=exif.module
-files[]=exif.class.php
+files[]=ExifFactory.php
+files[]=ExifInterface.php
+files[]=ExifPHPExtension.php
+files[]=SimpleExiftoolFacade.php
 files[]=exif_functionaltests.php
 files[]=exif_functionaltests_with_defaults.test
 files[]=exif_functionaltests_with_locale.test
 files[]=exif_unittests.test
 configure = admin/config/media/exif
-
