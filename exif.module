@@ -193,11 +193,45 @@ function _exif_get_file_uri_and_language($node, $field_image_name, $object_type)
   return $result;
 }
 
-function _exif_get_data_from_file_uri($exif,$file_uri) {
-  //common to media
-  $absoluteFilePath = drupal_realpath($file_uri);
-  $fullmetadata = $exif->readMetadataTags($absoluteFilePath);
-  return $fullmetadata;
+/**
+ * Get EXIF data from file or stream wrapper.
+ *
+ * Caches the meta data in a static variable so we don't have to process the
+ * file several times.
+ *
+ * @param object $exif
+ *   Exif class object.
+ * @param file $file_uri
+ *   File or stream wrapper to get EXIF data from.
+ *
+ * @return array
+ *   EXIF meta data.
+ */
+function _exif_get_data_from_file_uri($exif, $file_uri) {
+  $metadata = &drupal_static(__FUNCTION__);
+
+  if (!isset($metadata) || !isset($metadata[$file_uri])) {
+    if (stream_is_local($file_uri)) {
+      // If $file_uri is a local stream pass the real path to
+      // Exif::readMetadataTags().
+      $absolute_file_path = drupal_realpath($file_uri);
+      $metadata[$file_uri] = $exif->readMetadataTags($absolute_file_path);
+    } else {
+      // If $file_uri is not a local stream copy the file to local temp file and
+      // pass that file to Exif::readMetadataTags.
+      $tmp_name = drupal_tempnam(file_directory_temp(), 'exif') . '.' . pathinfo($file_uri, PATHINFO_EXTENSION);
+      if (copy($file_uri, $tmp_name)) {
+        $metadata[$file_uri] = $exif->readMetadataTags($tmp_name);
+        @drupal_unlink($tmp_name);
+      } else {
+        // If we failed to create the temporary file make sure we at least
+        // return an empty array.
+        $metadata[$file_uri] = array();
+      }
+    }
+  }
+
+  return $metadata[$file_uri];
 }
 
 /**
