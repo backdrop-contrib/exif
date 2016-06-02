@@ -525,15 +525,15 @@ function exif_field_widget_settings_form($field, $instance) {
 
   $form = array();
   if ($widget['type'] == 'exif_readonly') {
-    $exif_fields = _exif_field_widget_retreive_exif_fields();
-    $default_exif_value = _exif_get_field_widget_retreive_exif_field_default_value($widget);
-    $default_exif_separator_value = _exif_get_field_widget_retreive_exif_field_separator_default_value($widget);
+    $exif_fields = _exif_field_widget_retrieve_exif_fields();
+    $default_exif_value = _exif_get_field_widget_retrieve_exif_field_default_value($widget);
+    $default_exif_separator_value = _exif_get_field_widget_retrieve_exif_field_separator_default_value($widget);
     if ($instance['entity_type'] == 'node') {
-      $image_fields = _exif_field_widget_retreive_image_field_from_bundle($instance['entity_type'],$instance['bundle']);
-      $default_image_value = _exif_get_field_widget_retreive_image_field_default_value($widget,$image_fields);
+      $image_fields = _exif_field_widget_retrieve_image_field_from_bundle($instance['entity_type'],$instance['bundle']);
+      $default_image_value = _exif_get_field_widget_retrieve_image_field_default_value($widget,$image_fields);
       $form['image_field'] = array(
         '#type' => 'radios',
-        '#title' => t('image field to use to retreive data'),          
+        '#title' => t('image field to use to retrieve data'),          
         '#description' => t('determine the image used to look for exif and iptc metadata'),
         '#options' => $image_fields,
         '#default_value' => $default_image_value,
@@ -550,7 +550,7 @@ function exif_field_widget_settings_form($field, $instance) {
     $form['exif_field'] = array(
       '#type' => 'select',
       '#title' => t('exif field data'),
-      '#description' => t('These settings will automatically retreive data from the image field referenced.'),
+      '#description' => t('These settings will automatically retrieve data from the image field referenced.'),
       '#options' => array_merge(array('naming_convention' => 'name of the field is the exif field name'),$exif_fields),
       '#default_value' => $default_exif_value,
       '#element_validate' => array('_exif_field_widget_exif_field_validate'),    
@@ -571,7 +571,7 @@ function exif_field_widget_settings_form($field, $instance) {
  * @param $widget
  * @param $image_fields
  */
-function _exif_get_field_widget_retreive_image_field_default_value($widget,$image_fields) {
+function _exif_get_field_widget_retrieve_image_field_default_value($widget, $image_fields) {
   $result = $widget['settings']['image_field'];
   if ( empty($result) ) {
     $temp = array_keys($image_fields);
@@ -587,7 +587,7 @@ function _exif_get_field_widget_retreive_image_field_default_value($widget,$imag
  * @param $widget
  * @param $image_fields
  */
-function _exif_get_field_widget_retreive_exif_field_default_value($widget) {
+function _exif_get_field_widget_retrieve_exif_field_default_value($widget) {
   $result = $widget['settings']['exif_field'];
   if ( empty($result) ) {
     $result='naming_convention';
@@ -600,7 +600,7 @@ function _exif_get_field_widget_retreive_exif_field_default_value($widget) {
  * @param $widget
  * @param $image_fields
  */
-function _exif_get_field_widget_retreive_exif_field_separator_default_value($widget) {
+function _exif_get_field_widget_retrieve_exif_field_separator_default_value($widget) {
   $result = $widget['settings']['exif_field_separator'];
   if ( empty($result) ) {
     $result='';
@@ -623,10 +623,10 @@ function exif_field_widget_form(&$form, &$form_state, $field, $instance, $langco
 }
 
 /**
- * retreive all image_field fields of the same content type (bundle)
+ * retrieve all image_field fields of the same content type (bundle)
  * @param $bundle_name
  */
-function _exif_field_widget_retreive_image_field_from_bundle($entity_type, $bundle_name) {
+function _exif_field_widget_retrieve_image_field_from_bundle($entity_type, $bundle_name) {
   $fields_of_bundle = field_info_instances($entity_type,$bundle_name);
   $result = array();
   foreach ($fields_of_bundle as $key => $value) {
@@ -638,11 +638,11 @@ function _exif_field_widget_retreive_image_field_from_bundle($entity_type, $bund
 }
 
 /**
- * retreive all field keys possible
+ * retrieve all field keys possible
  *
  * @return unknown_type
  */
-function _exif_field_widget_retreive_exif_fields() {
+function _exif_field_widget_retrieve_exif_fields() {
   $exif = _exif_get_class();
   return $exif->getFieldKeys();
 }
@@ -653,7 +653,7 @@ function _exif_field_widget_retreive_exif_fields() {
 function _exif_field_widget_image_field_validate($element, &$form_state) {
   $image_field_settings = $form_state['values']['instance']['widget']['settings']['image_field'];
   if ( empty($image_field_settings) ) {
-    form_error($element, t('you must choose at least one image field to retreive metadata.'));
+    form_error($element, t('you must choose at least one image field to retrieve metadata.'));
   }
 
 }
@@ -664,7 +664,7 @@ function _exif_field_widget_image_field_validate($element, &$form_state) {
 function _exif_field_widget_exif_field_validate($element, &$form_state) {
   $exif_field_settings = $form_state['values']['instance']['widget']['settings']['exif_field'];
   if ( empty($exif_field_settings) ) {
-    form_error($element, t('you must choose at least one method to retreive image metadata.'));
+    form_error($element, t('you must choose at least one method to retrieve image metadata.'));
   }
 }
 

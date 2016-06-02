@@ -260,7 +260,7 @@ Class ExifPHPExtension implements ExifInterface {
 
   /**
    * $arOptions liste of options for the method :
-   * # enable_sections : (default : TRUE) retreive also sections.
+   * # enable_sections : (default : TRUE) retrieve also sections.
    * @param string $file
    * @param boolean $enable_sections
    * @return array $data
