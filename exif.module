@@ -94,9 +94,10 @@ function _exif_node_insert_update($object_type,$object,$update = TRUE) {
       }
     } else {
       $image_fields = _exif_get_image_fields($object_type, $object, $fields);
-      $metadata_image_fields = _exif_get_image_fields_metadata($object_type, $object, $ar_exif_fields, $image_fields);
+      $metadata_images_fields = _exif_get_image_fields_metadata($object_type, $object, $ar_exif_fields, $image_fields);
       foreach ($ar_exif_fields as $drupal_field => $metadata_field_descriptor) {
         $field_name = $drupal_field;
+        $field_type = $fields[$field_name];
         $tmp = NULL;
         if (property_exists($object, $field_name)) {
           $tmp = $object->$field_name;
@@ -107,35 +108,36 @@ function _exif_node_insert_update($object_type,$object,$update = TRUE) {
         }
         $key = $metadata_field_descriptor['metadata_field']['tag'];
         $section = $metadata_field_descriptor['metadata_field']['section'];
-        if (
-            array_key_exists($section, $metadata_image_fields[$metadata_field_descriptor['image_field']])
-            && array_key_exists($key, $metadata_image_fields[$metadata_field_descriptor['image_field']][$section])
-        ) {
-          $value = $metadata_image_fields[$metadata_field_descriptor['image_field']][$section][$key];
-          if (is_string($value) && isset($metadata_field_descriptor['metadata_field_separator'])) {
-            $value = explode($metadata_field_descriptor['metadata_field_separator'], $value);
-          }
-        } else {
-          $value = NULL;
-        }
-        if ($value != NULL) {
-          $field_type = $fields[$field_name];
-          if (is_array($value)) {
-            $j = 0;
-            foreach ($value as $innerkey => $innervalue) {
-              _exif_handle_field($j, $language, $field_type, $tmp, $section, $key, $innervalue);
-              $j++;
+        if (array_key_exists($metadata_field_descriptor['image_field'], $metadata_images_fields)) {
+          $values = array();
+          foreach ($metadata_images_fields[$metadata_field_descriptor['image_field']] as $metadata_image_fields) {
+            if (array_key_exists($section, $metadata_image_fields)
+              && array_key_exists($key, $metadata_image_fields[$section])
+            ) {
+              $value = $metadata_image_fields[$section][$key];
+              if (is_string($value) && isset($metadata_field_descriptor['metadata_field_separator'])) {
+                $subValues = explode($metadata_field_descriptor['metadata_field_separator'], $value);
+                foreach ($subValues as $index => $subValue) {
+                  $values[] = $subValue;
+                }
+              }
+              else {
+                $values[] = $value;
+              }
             }
-          } else {
-            _exif_handle_field(0, $language, $field_type, $tmp, $section, $key, $value);
           }
+
+          $j = 0;
+          foreach ($values as $innerkey => $value) {
+            _exif_handle_field($j, $language, $field_type, $tmp, $section, $key, $value);
+            $j++;
+          }
+          $object->$field_name = $tmp;
         }
-        $object->$field_name = $tmp;
       }
     }
   }
 }
-
 
 function _exif_get_image_fields_metadata($object_type,$node,&$ar_exif_fields,$image_fields) {
   $result = array();
@@ -151,11 +153,13 @@ function _exif_get_image_fields_metadata($object_type,$node,&$ar_exif_fields,$im
     if (empty($image_fields[$field_image_name])) {
       $result[$field_image_name] = array();
     } else {
-      $image_descriptor = _exif_get_file_uri_and_language($node, $field_image_name, $object_type);
-      if ($image_descriptor == FALSE) {
+      $images_descriptor = _exif_get_file_uri_and_language($node, $field_image_name, $object_type);
+      if ($images_descriptor == FALSE) {
         $fullmetadata=array();
       } else {
-        $fullmetadata = _exif_get_data_from_file_uri($exif,$image_descriptor['uri']);
+        foreach ($images_descriptor as $index => $image_descriptor) {
+          $fullmetadata[$index] = _exif_get_data_from_file_uri($exif, $image_descriptor['uri']);
+        }
       }
       $result[$field_image_name]=$fullmetadata;
       $ar_exif_fields[$drupal_field]['language']=$image_descriptor['language'];
@@ -176,19 +180,21 @@ function _exif_get_file_uri_and_language($node, $field_image_name, $object_type)
       if ($language == FALSE) {
         return FALSE;
       } else {
-        $fid = _exif_get_image_fid($field_image, $language);
-        if ($fid == FALSE) {
+        $fids = _exif_get_image_fid($field_image, $language);
+        if ($fids == FALSE) {
           return FALSE;
         } else {
-          $file = file_load($fid);
-          $result['uri']=$file->uri;
-          $result['language']=$language;
+          foreach ($fids as $index => $fid) {
+            $file = file_load($fid);
+            $result[$index]['uri']=$file->uri;
+            $result[$index]['language']=$language;
+          }
         }
       }
     }
   } else if ($object_type == 'file') {
-      $result['uri']=$node->uri;
-      $result['language']='und';
+      $result[0]['uri']=$node->uri;
+      $result[0]['language']='und';
   }
   return $result;
 }
@@ -451,17 +457,17 @@ function _exif_get_image_language($node,$field) {
 }
 
 function _exif_get_image_fid($field,$language) {
-  if (is_array($field[$language])) {
-    if (!empty($field[$language]) && is_array($field[$language][0])) {
-      $localized_field=$field[$language][0];
-    } else {
-      return FALSE;
+  $fids=array();
+  if (is_array($field[$language]) && !empty($field[$language])) {
+    foreach ($field[$language] as $index => $value) {
+      if (is_array($value))  {
+        $fids[]=$value['fid'];
+      }
     }
   } else  {
     return FALSE;
   }
-  $fid=$localized_field['fid'];
-  return $fid;
+  return $fids;
 }
 
 /**
