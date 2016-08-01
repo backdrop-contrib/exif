@@ -431,7 +431,7 @@ function _exif_get_image_fields($object_type,$object,$fields) {
   $result = array();
   if ($object_type=='node') {
     foreach ($fields as $key => $value) {
-      if (is_array($value) && is_array($value['widget']) && ( $value['widget']['type'] == 'image_image' || $value['widget']['type'] == 'media_generic' )  ) {
+      if (is_array($value) && is_array($value['widget']) && ( $value['widget']['type'] == 'image_image' || $value['widget']['type'] == 'media_generic' || $value['widget']['type'] == 'image_miw' )  ) {
         $result[$key]=$value;
       }
     }
@@ -630,7 +630,7 @@ function _exif_field_widget_retrieve_image_field_from_bundle($entity_type, $bund
   $fields_of_bundle = field_info_instances($entity_type,$bundle_name);
   $result = array();
   foreach ($fields_of_bundle as $key => $value) {
-    if (is_array($value) && is_array($value['widget']) && ( $value['widget']['type'] == 'image_image' || $value['widget']['type'] == 'media_generic' ) ) {
+    if (is_array($value) && is_array($value['widget']) && ( $value['widget']['type'] == 'image_image' || $value['widget']['type'] == 'media_generic' || $value['widget']['type'] == 'image_miw'  ) ) {
       $result[$key] = $value['label']." (".$key.")";
     }
   }
