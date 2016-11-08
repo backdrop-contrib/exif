@@ -129,8 +129,17 @@ function _exif_node_insert_update($object_type,$object,$update = TRUE) {
 
           $j = 0;
           foreach ($values as $innerkey => $value) {
-            _exif_handle_field($j, $language, $field_type, $tmp, $section, $key, $value);
-            $j++;
+            //case for keywords
+            if (is_array($value)) {
+                foreach ($value as $subkey => $subvalue) {
+                    _exif_handle_field($j, $language, $field_type, $tmp, $section, $key, $subvalue);
+                    $j++;
+                }
+            //others
+            } else {
+                _exif_handle_field($j, $language, $field_type, $tmp, $section, $key, $value);
+                $j++;
+            }
           }
           $object->$field_name = $tmp;
         }
