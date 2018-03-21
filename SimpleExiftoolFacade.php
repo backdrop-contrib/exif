@@ -112,7 +112,7 @@ class SimpleExifToolFacade implements ExifInterface {
     //print_r($output);
     if ($returnCode!=0) {
       $output= "";
-      watchdog(WATCHDOG_WARNING, t("exiftool return an error. can not extract metadata from file ").$file);
+      watchdog('exif', 'Exiftool returns an error. Can not extract metadata from file !file', array('!file' => $file), WATCHDOG_WARNING);
     }
     $info = implode("\n",$output);
     return $info;
@@ -160,7 +160,7 @@ class SimpleExifToolFacade implements ExifInterface {
           break;
       }
       // Logs a notice
-      watchdog(WATCHDOG_NOTICE, "error reading information from exiftool for file ".$file.": ".t($errorMessage));
+      watchdog('exif', 'Error reading information from exiftool for file !file: !message', array('!file' => $file, '!message' => $errorMessage), WATCHDOG_NOTICE);
       return array();
     }
   }

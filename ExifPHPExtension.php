@@ -68,7 +68,7 @@ Class ExifPHPExtension implements ExifInterface {
       } else {
         //remove from the list a non usable description.
         unset($arCckFields[$drupal_field]);
-        watchdog(WATCHDOG_WARNING, t("not able to understand exif field settings ") . $metadata_field);
+        watchdog('exif', 'Not able to understand exif field settings !field', array('!field' => $metadata_field), WATCHDOG_WARNING);
       }
     }
     return $arCckFields;
@@ -313,7 +313,7 @@ Class ExifPHPExtension implements ExifInterface {
     try {
       $exif = exif_read_data($file, 0,$enable_sections);
     }  catch (Exception $e) {
-      watchdog(WATCHDOG_WARNING, t("Error while reading EXIF tags from image." . $e->getMessage()));
+      watchdog('exif', 'Error while reading EXIF tags from image: !message', array('!message' => $e->getMessage()), WATCHDOG_WARNING);
     }
     $arSmallExif = array();
     foreach ((array) $exif as $key1 => $value1) {

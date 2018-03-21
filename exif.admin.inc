@@ -85,7 +85,7 @@ function exif_admin_settings() {
           }
         }
       } else {
-        watchdog(WATCHDOG_NOTICE, "section ".$section." does not contains an array. can not extract metadata for this section.");
+        watchdog('exif', 'Section !section does not contains an array. Can not extract metadata for this section.', array('!section' => $section), WATCHDOG_NOTICE);
       }
     }
   }
