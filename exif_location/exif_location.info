@@ -1,0 +1,7 @@
+name = EXIF Location
+description = "Sets a node location based on EXIF coordinates from an image."
+core = 7.x
+version = "7.x-1.x-dev"
+dependencies[] = exif
+dependencies[] = location
+dependencies[] = location_node
