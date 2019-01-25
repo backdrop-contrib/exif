@@ -311,8 +311,9 @@ Class ExifPHPExtension implements ExifInterface {
     }
     $exif = array();
     try {
-      $exif = exif_read_data($file, 0,$enable_sections);
-    }  catch (Exception $e) {
+      $exif = @exif_read_data($file, 0, $enable_sections);
+    }
+    catch (Exception $e) {
       watchdog('exif', 'Error while reading EXIF tags from image: !message', array('!message' => $e->getMessage()), WATCHDOG_WARNING);
     }
     $arSmallExif = array();
