@@ -105,15 +105,21 @@ Class ExifPHPExtension implements ExifInterface {
           $value=trim($value);
         }
         if (!drupal_validate_utf8($value)) {
-            $value=utf8_encode($value);
+          $value = utf8_encode($value);
         }
         switch ($key) {
           // String values.
           case 'usercomment':
-			if ($this->startswith($value,'UNICODE')) {
-				$value=substr($value,8);
-        	}
-        	break;
+          case 'title':
+          case 'comment':
+          case 'author':
+          case 'subject':
+            if ($this->startswith($value, 'UNICODE')) {
+              $value = substr($value, 8);
+            }
+            $value = $this->_exif_reencode_to_utf8($value);
+            break;
+
           // Date values.
           case 'filedatetime':
           	$value=date('c',$value);
@@ -121,8 +127,9 @@ Class ExifPHPExtension implements ExifInterface {
           case 'datetimeoriginal':
           case 'datetime':
           case 'datetimedigitized':
-            // In case we get a datefield, we need to reformat it to the ISO 8601 standard:
-            // which will look something like 2004-02-12T15:19:21
+            // In case we get a datefield, we need to reformat it
+            // to the ISO 8601 standard which will look something
+            // like '2004-02-12T15:19:21'.
             $date_time = explode(" ", $value);
             $date_time[0] = str_replace(":", "-", $date_time[0]);
             if (variable_get('exif_granularity', 0) == 1) {
