@@ -1,0 +1,169 @@
+Exif 7.x-1.x-dev, xxxx-xx-xx
+----------------------------
+#3273954 by DamienMcKenna: Add CHANGELOG.txt.
+
+
+Exif 7.x-1.10, 2022-04-06
+-------------------------
+#2046369 by martinjbaker: D7 support for exif_location.
+#3008207: Incorrect APP1 Exif Identifier Code in Exif->readExifTags().
+#2732203: Remove SXMP Library.
+Fix some string not correctly converted.
+#3268425 by DamienMcKenna: Add missing field admin permission for tests.
+#3273794 by DamienMcKenna: Fix file permissions.
+By FeyP, DamienMcKenna, mcdruid: Improved handling of Exif files.
+
+
+Exif 7.x-1.9, 2018-03-21
+------------------------
+#2939127: No need to list exif.module in exif.info files[] list.
+#2832511 by toasdt: Wrong watchdog() argument order.
+#2825595 by spgd01: iptc multiple keywords creates blank terms.
+#2773281 by makbuk: Warning: array_key_exists() expects parameter 2 to be array,
+  null given in _exif_node_insert_update.
+Bad retrieve spelling.
+#2709967: support multi-valued image-fields.
+#1918112: Data too long for column 'xxx' - We need to validate length of data
+  before saving.
+#1896498: Stream wrappers and performance.
+#1723832: Further metadatas human-readable.
+#2730897 by jphautin: Missing exif.class.php.
+
+
+Exif 7.x-1.8, 2016-03-08
+------------------------
+#2681575: Behaviour of "Refresh on node update"
+
+
+Exif 7.x-1.7, 2016-03-05
+------------------------
+ensure all vocabularies are loaded.
+
+
+Exif 7.x-1.6, 2016-02-28
+------------------------
+Integration of exiftool.
+#1692188: No exif data read until "Refresh on node update" setting is enabled.
+#1917406: Notice: Undefined index: gpsaltituderef + Notice: Undefined index:
+  gpsimgdirectionref.
+#1981486 by firfin: drush exif-update always runs, even on nodetypes not
+  selected.
+
+
+Exif 7.x-1.5, 2016-02-28
+------------------------
+Issue #2659804: Getting exif data not working in 7.x-1.3
+
+
+Exif 7.x-1.4, 2016-02-15
+------------------------
+Issue #1981660: Use of windows line endings
+Issue #2550365: Image Processing with GD or Image Magic
+Issue #2061249: Trim values before saving
+Issue #1517118: 'Division by zero' error
+Issue #2362237: Work with multiple vocabularies
+
+
+Exif 7.x-1.3, 2016-02-28
+------------------------
+#2656744 by jphautin: Strange characters in Exif Tags.
+#1445744: Existing term choosen instead of creating new one in the new
+  vocabulary.
+#1658502: Illegal string offset 'tag' in _exif_node_insert_update().
+#1357038: i18n Taxonomy translation breaks exif term reference.
+#2656744 by jphautin: Strange characters in Exif Tags.
+#1289992 by Shawn DeArmond, firfin: Add computed_copyright, exif_lens,
+  exif_lensid as selectable metadata.
+#1458782 by ryne.andal: Alphabetical list of fields in select drop down.
+#1019248 by marsdk, Xen: Incorrect APP1 Exif Identifier Code in
+  Exif->readExifTags().
+fix issue https://www.drupal.org/node/2325833
+fix issue http://drupal.org/node/1366014
+fix issue http://drupal.org/node/1529282
+fix issue http://drupal.org/node/1956946
+fix issue http://drupal.org/user/617182 media 2.0 API Change
+update XMP integration to use XMP PHP Toolkit, 2.0-rev14
+fix issue http://drupal.org/node/1529282
+
+
+Exif 7.x-1.2, 2011-11-14
+------------------------
+Fix issue http://drupal.org/node/1297060
+Fix issue http://drupal.org/node/1295832
+Fix issue http://drupal.org/node/668688
+Fix issue http://drupal.org/node/1289934
+Fix issue http://drupal.org/node/1297028
+Fix issue http://drupal.org/node/1277950
+Fix issue http://drupal.org/node/1055750
+Add first date module integration (see http://drupal.org/node/1191480).
+Add first drush integration for batch processing (see
+ http://drupal.org/node/668690). add first date module integration (see
+ http://drupal.org/node/1191480).
+Still working on date integration
+First attempt to integrate with last version of date module.
+Add media integration. can not apply patch as it make some regression).
+Fix issue http://drupal.org/node/1206038
+Fix issue http://drupal.org/node/1190328
+Add functional test on gps and comment issues. add the image in the admin page.
+Correct some mistake from the applied patch. still need some work as it seems
+  there is regression with apostrophe character. :(
+apply patch #12 from http://drupal.org/node/1176886
+fix issue http://drupal.org/node/1189074
+
+
+Exif 7.x-1.1, 2011-06-14
+------------------------
+Add a css to hidden term or textfield when cardinality of values is not set to
+ 1. correct apostrophe management with multiple text field.
+ (related to http://drupal.org/node/1149740).
+Added tests for non regression in simpletest suite.
+
+
+Exif 7.x-1.0, 2011-06-13
+------------------------
+Added first simpletest suite to ensure no regression before first release issues
+  fixed are : - http://drupal.org/node/1047220 (notice and warning message)
+  - http://drupal.org/node/1149740 (apostrophe)
+fix issue http://drupal.org/node/1019252. add new required library in the
+  install requirements.
+fix issue http://drupal.org/node/1019252 major rewriting of metadata values
+  formatting.
+fix issue http://www.drupal.org/node/1139944
+major refactoring to manage media bundle. see  http://drupal.org/node/1055750
+http://www.drupal.org/node/1113174
+add .gitignore file
+fix issue http://drupal.org/node/1084018
+fix issue http://drupal.org/node/1052786
+fix issue http://drupal.org/node/1065178
+correction of issues: http://drupal.org/node/1052474
+  http://drupal.org/node/1016092
+Stripping CVS keywords
+Update field setting management. adding image_field settings for each exif_field
+Update install warning title and description correct creation/deletion of
+  variable.
+Update field management to be compliant with old mode (naming convention) or
+  setup mode (widget field api).
+#935220
+First attempt to use widget field API
+Format classes to follow drupal coding rules.
+Update XMP integration
+Merge with 6.x branch, version 1.3-alpha1 update to work on drupal 7.0-alpha5
+Import of patch provided in issue 697244. see http://drupal.org/node/697244
+#178370 added location exif
+Updated from DRUPAL-5 branch.
+#170819 by Tomas Danek: Added Czech translation.
+Updated install directory example.
+#159266: Fixed error on non-JPEG images.
+Format change.
+#152819: Module .info files should not define 'version' in CVS
+Fixed info file.
+Fixed wrong image path.
+Updated for PEL 0.91
+Updated .info with dependency, package, version
+Implemented hook_uninstall
+Fixed warning when no image file is attached to image node
+Make sure no timezone offset is used when displaying date information
+Added install file
+Menu item capitalization
+Added POT file and fr.po
+Added Exif module
