@@ -1,25 +1,26 @@
 <?php
+
 /**
- * @file the install part of the module
+ * @file
+ * The install part of the module.
  */
 
 /**
- * Implementation of hook_install().
+ * Implements hook_install().
  */
 function exif_install() {
-  variable_set('exif_update',TRUE);
+  variable_set('exif_update', TRUE);
 }
 
 /**
- * Implementation of hook_install().
+ * Implements hook_install().
  */
 function exif_uninstall() {
   variable_del('exif_update');
 }
 
 /**
- * implementation of hook_requirements
- * @param $phase
+ * Implements hook_requirements().
  */
 function exif_requirements($phase) {
   $t = get_t();

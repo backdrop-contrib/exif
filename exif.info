@@ -1,16 +1,17 @@
-name = Exif
-description = "Display image metadata (exif and iptc)."
+name = EXIF
+description = "Display image metadata (EXIF and IPTC)."
 package = Image
 core = 7.x
-version = "7.x-1.x-dev"
+configure = admin/config/media/exif
 dependencies[] = taxonomy
 dependencies[] = image
 files[]=ExifFactory.php
 files[]=ExifInterface.php
 files[]=ExifPHPExtension.php
 files[]=SimpleExiftoolFacade.php
+
+; Tests.
 files[]=exif_functionaltests.php
 files[]=exif_functionaltests_with_defaults.test
 files[]=exif_functionaltests_with_locale.test
 files[]=exif_unittests.test
-configure = admin/config/media/exif

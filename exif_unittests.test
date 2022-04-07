@@ -1,11 +1,19 @@
 <?php
+
+/**
+ *
+ */
 class ExifUnitTestCase extends DrupalUnitTestCase {
+
+  /**
+   * Define this tests.
+   */
   public static function getInfo() {
     return array(
-      'name' => 'Exif Unit test of Metadata functions',
+      'name' => 'EXIF Unit test of Metadata functions',
       'description' => 'Ensure that the exif functions properly.',
-      'group' => 'Exif',
+      'group' => 'exif',
     );
   }
+
 }
-?>

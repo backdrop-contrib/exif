@@ -1,29 +1,23 @@
 <?php
-// $Id:
-include_once drupal_get_path('module', 'exif') .'/ExifInterface.php';
 
 /**
- * @author: Jean-Philippe Hautin
- *
- * Adapted from exif module by Raphael Schär - www.rapsli.ch, www.schaerwebdesign.ch
- * Changes:
- * - suppress need of 'sub-module' exif_helper
- * - update to use Drupal 7 Field API (new hook and logic)
- * - update to use Drupal 7 i18n nodes
- * - Support several field types
- *   - text field (as previous version)
- *   - term reference type (new !). This allow to
- *     - able to create terms (iptc and exif values)
- *     - able to create parent terms (iptc and exif field key)
- *
+ * @file
+ * Primary hook implementations for the EXIF module.
  */
 
+use Drupal\exif\ExifFactory;
+
+include_once drupal_get_path('module', 'exif') . '/ExifInterface.php';
+
+/**
+ * Implements hook_menu().
+ */
 function exif_menu() {
   $items['admin/config/media/exif'] = array(
     'title' => 'Image Metadata',
     'page callback' => 'exif_admin_settings',
     'access arguments' => array('administer image metadata'),
-    'description' => t('Display available fields'),
+    'description' => 'Display available fields',
     'access callback' => 'user_access',
     'file' => 'exif.admin.inc',
     'type' => MENU_NORMAL_ITEM,
@@ -32,7 +26,7 @@ function exif_menu() {
     'title' => 'Image Metadata',
     'page callback' => 'exif_admin_settings',
     'access arguments' => array('administer image metadata'),
-    'description' => t('Display available fields'),
+    'description' => 'Display available fields',
     'access callback' => 'user_access',
     'file' => 'exif.admin.inc',
     'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -42,9 +36,9 @@ function exif_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('exif_admin_settings_form'),
     'access arguments' => array('administer image metadata'),
-    'description' => t('Images Metadata Settings'),
+    'description' => 'Images Metadata Settings',
     'access callback' => 'user_access',
-  	'file' => 'exif.admin.inc',
+    'file' => 'exif.admin.inc',
     'type' => MENU_LOCAL_TASK,
   );
   return $items;
@@ -54,10 +48,11 @@ function exif_menu() {
  * Implements hook_help().
  */
 function exif_help($path, $arg) {
-  include_once drupal_get_path('module', 'exif'). '/exif.admin.inc';
+  include_once drupal_get_path('module', 'exif') . '/exif.admin.inc';
   switch ($path) {
-    case 'admin/help#exif':	return exif_admin_settings();
-    case 'admin/help/exif':	return exif_admin_settings();
+    case 'admin/help#exif':
+    case 'admin/help/exif':
+      return exif_admin_settings();
   }
 }
 
@@ -75,13 +70,14 @@ function exif_permission() {
 
 /**
  * Main entrypoint of the module.
- * @param $object_type
- * @param $object
+ *
+ * @param string $object_type
+ * @param object $object
  */
-function _exif_node_insert_update($object_type,$object,$update = TRUE) {
+function _exif_node_insert_update($object_type, $object, $update = TRUE) {
   $type = $object->type;
-  $fields = field_info_instances($object_type,$type);
-  if(_exif_check_for_exif_data($type)){
+  $fields = field_info_instances($object_type, $type);
+  if (_exif_check_for_exif_data($type)) {
     $exif = _exif_get_class();
     $ar_exif_fields = _exif_filter_fields_on_widgets($fields);
     $ar_exif_fields = $exif->getMetadataFields($ar_exif_fields);
@@ -93,7 +89,8 @@ function _exif_node_insert_update($object_type,$object,$update = TRUE) {
           $object->$field_name = $original->$field_name;
         }
       }
-    } else {
+    }
+    else {
       $image_fields = _exif_get_image_fields($object_type, $object, $fields);
       $metadata_images_fields = _exif_get_image_fields_metadata($object_type, $object, $ar_exif_fields, $image_fields);
       foreach ($ar_exif_fields as $drupal_field => $metadata_field_descriptor) {
@@ -130,16 +127,17 @@ function _exif_node_insert_update($object_type,$object,$update = TRUE) {
 
           $j = 0;
           foreach ($values as $innerkey => $value) {
-            //case for keywords
+            // Case for keywords.
             if (is_array($value)) {
-                foreach ($value as $subkey => $subvalue) {
-                    _exif_handle_field($j, $language, $field_type, $tmp, $section, $key, $subvalue);
-                    $j++;
-                }
-            //others
-            } else {
-                _exif_handle_field($j, $language, $field_type, $tmp, $section, $key, $value);
+              foreach ($value as $subkey => $subvalue) {
+                _exif_handle_field($j, $language, $field_type, $tmp, $section, $key, $subvalue);
                 $j++;
+              }
+              // Others.
+            }
+            else {
+              _exif_handle_field($j, $language, $field_type, $tmp, $section, $key, $value);
+              $j++;
             }
           }
           $object->$field_name = $tmp;
@@ -149,62 +147,91 @@ function _exif_node_insert_update($object_type,$object,$update = TRUE) {
   }
 }
 
-function _exif_get_image_fields_metadata($object_type,$node,&$ar_exif_fields,$image_fields) {
+/**
+ *
+ *
+ * @param string $object_type
+ * @param object $node
+ * @param array $exif_fields
+ * @param array $image_fields
+ */
+function _exif_get_image_fields_metadata($object_type, $node, array &$exif_fields, array $image_fields) {
   $result = array();
-  if (empty($ar_exif_fields)) {
+  if (empty($exif_fields)) {
     return TRUE;
   }
   if (empty($image_fields)) {
     return FALSE;
   }
   $exif = _exif_get_class();
-  foreach ($ar_exif_fields as $drupal_field => $metadata_settings) {
+  foreach ($exif_fields as $drupal_field => $metadata_settings) {
     $field_image_name = $metadata_settings['image_field'];
     if (empty($image_fields[$field_image_name])) {
       $result[$field_image_name] = array();
-    } else {
+    }
+    else {
       $images_descriptor = _exif_get_file_uri_and_language($node, $field_image_name, $object_type);
-      if ($images_descriptor == FALSE) {
-        $fullmetadata=array();
-      } else {
+      $fullmetadata = array();
+      if (!empty($images_descriptor)) {
         foreach ($images_descriptor as $index => $image_descriptor) {
           $fullmetadata[$index] = _exif_get_data_from_file_uri($exif, $image_descriptor['uri']);
         }
       }
-      $result[$field_image_name]=$fullmetadata;
-      $ar_exif_fields[$drupal_field]['language']=$image_descriptor['language'];
+      $result[$field_image_name] = $fullmetadata;
+
+      // @todo This was failing because the image_descriptor variable didn't
+      // exist. Track down where this came from and work out why it's was
+      // written this way; it might have just been an oversight.
+      if (isset($image_descriptor['language'])) {
+        $exif_fields[$drupal_field]['language'] = $image_descriptor['language'];
+      }
+      else {
+        $exif_fields[$drupal_field]['language'] = LANGUAGE_NONE;
+      }
     }
   }
   return $result;
 }
 
+/**
+ *
+ *
+ * @param object $node
+ * @param string $field_image_name
+ * @param string $object_type
+ */
 function _exif_get_file_uri_and_language($node, $field_image_name, $object_type) {
+  $result = array();
   if ($object_type == 'node') {
-    $result = array();
-    //then check it is an array
-    if (!is_array($node->$field_image_name)) {
+    // Escape early if the field doesn't exist or the field does not contain an
+    // array.
+    if (!isset($node->$field_image_name) || !is_array($node->$field_image_name)) {
       return FALSE;
-    } else {
+    }
+    else {
       $field_image = $node->$field_image_name;
       $language = _exif_get_image_language($node, $field_image);
       if ($language == FALSE) {
         return FALSE;
-      } else {
+      }
+      else {
         $fids = _exif_get_image_fid($field_image, $language);
         if ($fids == FALSE) {
           return FALSE;
-        } else {
+        }
+        else {
           foreach ($fids as $index => $fid) {
             $file = file_load($fid);
-            $result[$index]['uri']=$file->uri;
-            $result[$index]['language']=$language;
+            $result[$index]['uri'] = $file->uri;
+            $result[$index]['language'] = $language;
           }
         }
       }
     }
-  } else if ($object_type == 'file') {
-      $result[0]['uri']=$node->uri;
-      $result[0]['language']='und';
+  }
+  elseif ($object_type == 'file') {
+    $result[0]['uri'] = $node->uri;
+    $result[0]['language'] = 'und';
   }
   return $result;
 }
@@ -216,8 +243,8 @@ function _exif_get_file_uri_and_language($node, $field_image_name, $object_type)
  * file several times.
  *
  * @param object $exif
- *   Exif class object.
- * @param file $file_uri
+ *   EXIF class object.
+ * @param string $file_uri
  *   File or stream wrapper to get EXIF data from.
  *
  * @return array
@@ -232,14 +259,16 @@ function _exif_get_data_from_file_uri($exif, $file_uri) {
       // Exif::readMetadataTags().
       $absolute_file_path = drupal_realpath($file_uri);
       $metadata[$file_uri] = $exif->readMetadataTags($absolute_file_path);
-    } else {
+    }
+    else {
       // If $file_uri is not a local stream copy the file to local temp file and
       // pass that file to Exif::readMetadataTags.
       $tmp_name = drupal_tempnam(file_directory_temp(), 'exif') . '.' . pathinfo($file_uri, PATHINFO_EXTENSION);
       if (copy($file_uri, $tmp_name)) {
         $metadata[$file_uri] = $exif->readMetadataTags($tmp_name);
         @drupal_unlink($tmp_name);
-      } else {
+      }
+      else {
         // If we failed to create the temporary file make sure we at least
         // return an empty array.
         $metadata[$file_uri] = array();
@@ -251,63 +280,86 @@ function _exif_get_data_from_file_uri($exif, $file_uri) {
 }
 
 /**
- * handle field by delegating to specific type handler.
- * @param $index
- * @param $field_type
- * @param $field_data
- * @return unknown_type
+ * Handle field by delegating to specific type handler.
+ *
+ * @param int $index
+ * @param string $field_type
+ * @param array $field_data
+ * @param string $exif_section
+ * @param string $exif_name
+ * @param string $exif_value
  */
-function _exif_handle_field($index,$language,$field_type,&$field_data,$exif_section,$exif_name,$exif_value) {
-  $field=field_info_field($field_type['field_name']);
-  if ($field['module']=='text') {
-    _exif_handle_text_field($index,$language,$field,$field_type,$field_data,$exif_section,$exif_name,$exif_value);
-  } else if ($field['module']=='taxonomy' || $field['module']=='i18n_taxonomy' ) {
-    _exif_handle_taxonomy_field($index,$language,$field,$field_type,$field_data,$exif_section,$exif_name,$exif_value);
-  } else if ($field['module']=='date') {
-    _exif_handle_date_field($index,$language,$field,$field_type,$field_data,$exif_section,$exif_name,$exif_value);
+function _exif_handle_field($index, $language, $field_type, array &$field_data, $exif_section, $exif_name, $exif_value) {
+  $field = field_info_field($field_type['field_name']);
+  if ($field['module'] == 'text') {
+    _exif_handle_text_field($index, $language, $field, $field_type, $field_data, $exif_section, $exif_name, $exif_value);
+  }
+  elseif ($field['module'] == 'taxonomy' || $field['module'] == 'i18n_taxonomy') {
+    _exif_handle_taxonomy_field($index, $language, $field, $field_type, $field_data, $exif_section, $exif_name, $exif_value);
+  }
+  elseif ($field['module'] == 'date') {
+    _exif_handle_date_field($index, $language, $field, $field_type, $field_data, $exif_section, $exif_name, $exif_value);
   }
 }
 
-
-function _exif_handle_field_value_consistency($exif_value,$field) {
+/**
+ *
+ *
+ * @param string $exif_value
+ * @param array $field
+ */
+function _exif_handle_field_value_consistency($exif_value, array $field) {
   if (!drupal_validate_utf8($exif_value)) {
-    $exif_value=check_plain(utf8_encode($exif_value));
+    $exif_value = check_plain(utf8_encode($exif_value));
   }
   if (!empty($field['settings']['max_length'])) {
-      $exif_value = truncate_utf8($exif_value, $field['settings']['max_length'], TRUE, TRUE);
+    $exif_value = truncate_utf8($exif_value, $field['settings']['max_length'], TRUE, TRUE);
   }
   return $exif_value;
 }
 
 /**
- * handle text field.
- * @param $index
- * @param $field_data
- * @return unknown_type
+ * Handle text field.
+ *
+ * @param int $index
+ * @param string $language
+ * @param array $field
+ * @param string $field_type
+ * @param array $field_data
+ * @param string $exif_section
+ * @param string $exif_name
+ * @param string $exif_value
  */
-function _exif_handle_text_field($index,$language,$field,$field_type,&$field_data,$exif_section,$exif_name,$exif_value) {
-  $field_data[$language][$index]['value'] = _exif_handle_field_value_consistency($exif_value,$field);
+function _exif_handle_text_field($index, $language, array $field, $field_type, array &$field_data, $exif_section, $exif_name, $exif_value) {
+  $field_data[$language][$index]['value'] = _exif_handle_field_value_consistency($exif_value, $field);
 }
 
 /**
- * handle date field.
- * @param $exifindex
- * @param $field_data
- * @return unknown_type
+ * Handle date field.
+ *
+ * @param int $index
+ * @param string $language
+ * @param array $field
+ * @param string $field_type
+ * @param array $field_data
+ * @param string $exif_section
+ * @param string $exif_name
+ * @param string $exif_value
  */
-function _exif_handle_date_field($index,$language,$field,$field_type,&$field_data,$exif_section,$exif_name,$exif_value) {
-  $exif_value=_exif_handle_field_value_consistency($exif_value,$field);
-  if ($exif_name=='filedatetime') {
-  	$format = DateObject::ATOM;
-  } else {
-  	//exif internal format do not handle timezone :( 
-  	//Using website timezone instead.
-  	$format = variable_get('date_format_exif', 'Y-m-d\TH:i:s');
+function _exif_handle_date_field($index, $language, array $field, $field_type, array &$field_data, $exif_section, $exif_name, $exif_value) {
+  $exif_value = _exif_handle_field_value_consistency($exif_value, $field);
+  if ($exif_name == 'filedatetime') {
+    $format = DateObject::ATOM;
   }
-  $date_datetime = new DateObject($exif_value,NULL, $format);
-  //change to requeted timezone
+  else {
+    // EXIF internal format do not handle timezone :(
+    // Using website timezone instead.
+    $format = variable_get('date_format_exif', 'Y-m-d\TH:i:s');
+  }
+  $date_datetime = new DateObject($exif_value, NULL, $format);
+  // Change to requeted timezone.
   $date_datetime->setTimezone(timezone_open(date_get_timezone($field['settings']['tz_handling'])));
-  $offset= $date_datetime->getOffset();
+  $offset = $date_datetime->getOffset();
   $date_field = $date_datetime->format(date_type_format($field['type']));
   $field_data[$language][$index] = array(
     'value' => $date_field,
@@ -319,38 +371,48 @@ function _exif_handle_date_field($index,$language,$field,$field_type,&$field_dat
 }
 
 /**
- * handle taxonomy field.
- * @param $terms
- * @param $field_data
+ * Handle taxonomy field.
+ *
+ * @param int $index
+ * @param string $language
+ * @param array $field
+ * @param string $field_type
+ * @param array $field_data
+ * @param string $exif_section
+ * @param string $exif_name
+ * @param string $exif_value
  */
-function _exif_handle_taxonomy_field($index,$language,$field,$field_type,&$field_data,$exif_section,$exif_name,$exif_value)  {
-  $exif_value=_exif_handle_field_value_consistency($exif_value,$field);
+function _exif_handle_taxonomy_field($index, $language, array $field, $field_type, array &$field_data, $exif_section, $exif_name, $exif_value) {
+  $exif_value = _exif_handle_field_value_consistency($exif_value, $field);
   $chosen_vocabulary = $field['settings']['allowed_values'][0]['vocabulary'];
   if (isset($chosen_vocabulary)) {
     $vocabularies = taxonomy_vocabulary_get_names();
     if (is_array($vocabularies) && isset($vocabularies[$chosen_vocabulary])) {
       $vocabulary = $vocabularies[$chosen_vocabulary];
-      $terms = taxonomy_get_term_by_name($exif_value,$chosen_vocabulary);
-      if (is_array($terms) && count($terms)>0) {
+      $terms = taxonomy_get_term_by_name($exif_value, $chosen_vocabulary);
+      if (is_array($terms) && count($terms) > 0) {
         $term = array_shift($terms);
         $field_data[$language][$index]['tid'] = $term->tid;
-      } else {
-        //TODO: make auto-creation optional even if vocabulary exist.
+      }
+      else {
+        // @todo make auto-creation optional even if vocabulary exist.
         // if not exist, create it
-        //store full metadata in vocabulary
-        $terms = taxonomy_get_term_by_name($exif_name,$chosen_vocabulary);
-        if (is_array($terms) && count($terms)>0) {
+        // store full metadata in vocabulary
+        $terms = taxonomy_get_term_by_name($exif_name, $chosen_vocabulary);
+        if (is_array($terms) && count($terms) > 0) {
           $parent_term = array_shift($terms);
-        } else {
-          $terms = taxonomy_get_term_by_name($exif_section,$chosen_vocabulary);
-          if (is_array($terms) && count($terms)>0) {
-            $section_term = array_shift($terms);
-          } else {
-            $section_term = _exif_create_term($vocabulary->vid,$exif_section);
-          }
-          $parent_term = _exif_create_term($vocabulary->vid,$exif_name,$section_term->tid);
         }
-        $term = _exif_create_term($vocabulary->vid,$exif_value,$parent_term->tid);
+        else {
+          $terms = taxonomy_get_term_by_name($exif_section, $chosen_vocabulary);
+          if (is_array($terms) && count($terms) > 0) {
+            $section_term = array_shift($terms);
+          }
+          else {
+            $section_term = _exif_create_term($vocabulary->vid, $exif_section);
+          }
+          $parent_term = _exif_create_term($vocabulary->vid, $exif_name, $section_term->tid);
+        }
+        $term = _exif_create_term($vocabulary->vid, $exif_value, $parent_term->tid);
         if (isset($term->tid)) {
           $field_data[$language][$index]['tid'] = $term->tid;
         }
@@ -360,31 +422,36 @@ function _exif_handle_taxonomy_field($index,$language,$field,$field_type,&$field
 }
 
 /**
+ * Create a term in the specified vocabulary.
  *
- * @param $vid
- * @param $name
- * @param $parent_term
- * @return stdClass the newly created term
+ * @param int $vid
+ *   The ID of the vocabulary to add the term to.
+ * @param string $name
+ *   The name of the taxonomy term.
+ * @param int $parent_term
+ *   The parent term ID; defaults to 0.
+ *
+ * @return object
+ *   The newly created term object.
  */
-function _exif_create_term($vid,$name,$parent_term = 0) {
+function _exif_create_term($vid, $name, $parent_term = 0) {
   $term = new stdClass();
-  $term->vid=$vid;
-  $term->name=$name;
-  $term->parent=array($parent_term);
+  $term->vid = $vid;
+  $term->name = $name;
+  $term->parent = array($parent_term);
   taxonomy_term_save($term);
   return $term;
 }
 
 /**
- * implementation of hook_field_attach_presave.
- *
- * Calculate the value for each metadata field so they can be stored correctly.
- *
+ * Implements hook_field_attach_presave().
  */
 function exif_field_attach_presave($obj_type, $object) {
+  // Calculate the value for each metadata field so they can be stored
+  // correctly.
   if ($obj_type == 'node' || $obj_type == 'file') {
     $shouldUpdateMetadata = variable_get('exif_update', TRUE);
-    _exif_node_insert_update($obj_type, $object,$shouldUpdateMetadata);
+    _exif_node_insert_update($obj_type, $object, $shouldUpdateMetadata);
   }
 }
 
@@ -395,39 +462,43 @@ function exif_field_attach_presave($obj_type, $object) {
  * format exif dates is parsed as.
  */
 function exif_date_format_types() {
-  return array('exif' => 'Exif');
+  return array('exif' => 'EXIF');
 }
 
 /**
  * Date API hook.
  *
  * Make the EXIF date format default for the 'exif' date type.
+ *
+ * @return array
  */
 function exif_date_formats() {
   return array(
-  array(
+    array(
       'type' => 'exif',
       'format' => 'Y:m:d H:i:s',
-  ),
+    ),
   );
 }
 
 /**
  * Let's check if this node type contains an image field.
  *
- * @param $fields fields from this content type
- * @return boolean
+ * @param string $node_type
+ *   The content type to process.
+ *
+ * @return bool
  */
 function _exif_check_for_exif_data($node_type) {
   $new_types = array();
-  //fill up array with checked nodetypes
+  // Fill up array with checked nodetypes.
   foreach (variable_get('exif_nodetypes', array()) as $type) {
-    if ($type != "0" ) {
+    if ($type != "0") {
       $new_types[] = $type;
     }
   }
   foreach (variable_get('exif_mediatypes', array()) as $type) {
-    if ($type != "0" ) {
+    if ($type != "0") {
       $new_types[] = $type;
     }
   }
@@ -437,62 +508,92 @@ function _exif_check_for_exif_data($node_type) {
   return FALSE;
 }
 
-function _exif_get_image_fields($object_type,$object,$fields) {
+/**
+ *
+ *
+ * @param string $object_type
+ * @param object $object
+ * @param array $fields
+ *
+ * @return array
+ */
+function _exif_get_image_fields($object_type, $object, array $fields) {
   $result = array();
-  if ($object_type=='node') {
+  if ($object_type == 'node') {
     foreach ($fields as $key => $value) {
-      if (is_array($value) && is_array($value['widget']) && ( $value['widget']['type'] == 'image_image' || $value['widget']['type'] == 'media_generic' || $value['widget']['type'] == 'image_miw' )  ) {
-        $result[$key]=$value;
+      if (is_array($value) && is_array($value['widget']) && ($value['widget']['type'] == 'image_image' || $value['widget']['type'] == 'media_generic' || $value['widget']['type'] == 'image_miw')) {
+        $result[$key] = $value;
       }
     }
   }
   if ($object_type == 'file') {
-    $result['file']=$object;
+    $result['file'] = $object;
   }
   return $result;
 }
 
-function _exif_get_image_language($node,$field) {
+/**
+ *
+ * @param object $node
+ * @param string $field
+ *
+ * @return string|bool
+ */
+function _exif_get_image_language($node, $field) {
   if (property_exists($node, 'language')) {
-    if (array_key_exists($node->language,$field)) {
+    if (array_key_exists($node->language, $field)) {
       return $node->language;
-    } else   if (array_key_exists('und',$field)) {
-      return 'und';
-    } else {
+    }
+    elseif (array_key_exists(LANGUAGE_NONE, $field)) {
+      return LANGUAGE_NONE;
+    }
+    else {
       return FALSE;
     }
-  } else {
+  }
+  else {
     return FALSE;
   }
 }
 
-function _exif_get_image_fid($field,$language) {
-  $fids=array();
+/**
+ *
+ *
+ * @param array $field
+ * @param string $language
+ *
+ * @return bool|array
+ */
+function _exif_get_image_fid(array $field, $language) {
+  $fids = array();
   if (is_array($field[$language]) && !empty($field[$language])) {
     foreach ($field[$language] as $index => $value) {
-      if (is_array($value))  {
-        $fids[]=$value['fid'];
+      if (is_array($value)) {
+        $fids[] = $value['fid'];
       }
     }
-  } else  {
+  }
+  else {
     return FALSE;
   }
   return $fids;
 }
 
 /**
- * Helper function to get the exif class
- * @return Exif
+ * Helper function to get the exif class.
+ *
+ * @return \Exif
  */
 function _exif_get_class() {
-  include_once drupal_get_path('module', 'exif') .'/ExifFactory.php';
-  $exif = \Drupal\exif\ExifFactory::getExifInterface();
+  include_once drupal_get_path('module', 'exif') . '/ExifFactory.php';
+  $exif = ExifFactory::getExifInterface();
   return $exif;
 }
 
 //
 // NEW VERSION FOR CONFIGURING FIELD. USING NEW FIELD WIDGET API.
 //
+
 /**
  * Implements hook_field_widget_info().
  */
@@ -501,11 +602,19 @@ function exif_field_widget_info() {
     'exif_readonly' => array(
       'label' => t('metadata from image'),
       'description' => t('field content is calculated from image field in the same content type (read only)'),
-      'field types' => array('text', 'text_long','text_with_summary', 'taxonomy_term_reference','date', 'datetime', 'datestamp'),
+      'field types' => array(
+        'text',
+        'text_long',
+        'text_with_summary',
+        'taxonomy_term_reference',
+        'date',
+        'datetime',
+        'datestamp',
+      ),
       'settings' => array(
         'image_field' => '',
         'exif_field' => '',
-        'exif_field_separator' => ''
+        'exif_field_separator' => '',
       ),
       'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
@@ -519,14 +628,20 @@ function exif_field_widget_info() {
  * Implements hook_field_widget_info_alter().
  */
 function exif_field_widget_info_alter(&$info) {
-  // By default the field types is an empty array.
-  $field_types = array('text', 'text_long', 'taxonomy_term_reference','date', 'datetime', 'datestamp');
+  $field_types = array(
+    'text',
+    'text_long',
+    'taxonomy_term_reference',
+    'date',
+    'datetime',
+    'datestamp',
+  );
   $info['options_select']['field types'] = array_unique(array_merge($info['options_select']['field types'], $field_types));
   $info['options_buttons']['field types'] = array_unique(array_merge($info['options_buttons']['field types'], $field_types));
 }
 
 /**
- * Implementation of hook_widget_settings().
+ * Implements hook_widget_settings().
  */
 function exif_field_widget_settings_form($field, $instance) {
   $widget   = $instance['widget'];
@@ -539,11 +654,11 @@ function exif_field_widget_settings_form($field, $instance) {
     $default_exif_value = _exif_get_field_widget_retrieve_exif_field_default_value($widget);
     $default_exif_separator_value = _exif_get_field_widget_retrieve_exif_field_separator_default_value($widget);
     if ($instance['entity_type'] == 'node') {
-      $image_fields = _exif_field_widget_retrieve_image_field_from_bundle($instance['entity_type'],$instance['bundle']);
-      $default_image_value = _exif_get_field_widget_retrieve_image_field_default_value($widget,$image_fields);
+      $image_fields = _exif_field_widget_retrieve_image_field_from_bundle($instance['entity_type'], $instance['bundle']);
+      $default_image_value = _exif_get_field_widget_retrieve_image_field_default_value($widget, $image_fields);
       $form['image_field'] = array(
         '#type' => 'radios',
-        '#title' => t('image field to use to retrieve data'),          
+        '#title' => t('image field to use to retrieve data'),
         '#description' => t('determine the image used to look for exif and iptc metadata'),
         '#options' => $image_fields,
         '#default_value' => $default_image_value,
@@ -561,65 +676,72 @@ function exif_field_widget_settings_form($field, $instance) {
       '#type' => 'select',
       '#title' => t('exif field data'),
       '#description' => t('These settings will automatically retrieve data from the image field referenced.'),
-      '#options' => array_merge(array('naming_convention' => 'name of the field is the exif field name'),$exif_fields),
+      '#options' => array_merge(array('naming_convention' => 'name of the field is the exif field name'), $exif_fields),
       '#default_value' => $default_exif_value,
-      '#element_validate' => array('_exif_field_widget_exif_field_validate'),    
+      '#element_validate' => array('_exif_field_widget_exif_field_validate'),
     );
     $form['exif_field_separator'] = array(
-        '#type' => 'textfield',
-        '#title' => t('exif field separator'),
-        '#description' => t('separator used to split values (if field definition support several values). let it empty if you do not want to split values.'),
-        '#default_value' => $default_exif_separator_value,
-        '#element_validate' => array('_exif_field_widget_exif_field_separator_validate'),
+      '#type' => 'textfield',
+      '#title' => t('exif field separator'),
+      '#description' => t('separator used to split values (if field definition support several values). let it empty if you do not want to split values.'),
+      '#default_value' => $default_exif_separator_value,
+      '#element_validate' => array('_exif_field_widget_exif_field_separator_validate'),
     );
   }
   return $form;
 }
 
 /**
- * calculate default value for settings form (more precisely image_field setting) of widget.
- * @param $widget
- * @param $image_fields
+ * Calculate default value for settings form of widget.
+ *
+ * @param array $widget
+ * @param array $image_fields
+ *
+ * @return string
  */
-function _exif_get_field_widget_retrieve_image_field_default_value($widget, $image_fields) {
+function _exif_get_field_widget_retrieve_image_field_default_value(array $widget, array $image_fields) {
   $result = $widget['settings']['image_field'];
-  if ( empty($result) ) {
+  if (empty($result)) {
     $temp = array_keys($image_fields);
     if (!empty($temp) && is_array($temp)) {
-    	$result= $temp[0];
+      $result = $temp[0];
     }
   }
   return $result;
 };
 
 /**
- * calculate default value for settings form (more precisely exif_field setting) of widget.
- * @param $widget
- * @param $image_fields
+ * Calculate default value for settings form of widget.
+ *
+ * @param array $widget
+ *
+ * @return string
  */
-function _exif_get_field_widget_retrieve_exif_field_default_value($widget) {
+function _exif_get_field_widget_retrieve_exif_field_default_value(array $widget) {
   $result = $widget['settings']['exif_field'];
-  if ( empty($result) ) {
-    $result='naming_convention';
+  if (empty($result)) {
+    $result = 'naming_convention';
   }
   return $result;
 };
 
 /**
- * calculate default value for settings form (more precisely exif_field_separator setting) of widget.
- * @param $widget
- * @param $image_fields
+ * Calculate default value for settings form of widget.
+ *
+ * @param array $widget
+ *
+ * @return string
  */
-function _exif_get_field_widget_retrieve_exif_field_separator_default_value($widget) {
+function _exif_get_field_widget_retrieve_exif_field_separator_default_value(array $widget) {
   $result = $widget['settings']['exif_field_separator'];
-  if ( empty($result) ) {
-    $result='';
+  if (empty($result)) {
+    $result = '';
   }
   return $result;
 };
 
 /**
- * Implementation of hook_field_widget_form().
+ * Implements hook_field_widget_form().
  */
 function exif_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
   $form['#attached']['css'][] = drupal_get_path('module', 'exif') . '/exif.css';
@@ -633,24 +755,28 @@ function exif_field_widget_form(&$form, &$form_state, $field, $instance, $langco
 }
 
 /**
- * retrieve all image_field fields of the same content type (bundle)
- * @param $bundle_name
+ * Retrieve all image_field fields of the same content type (bundle)
+ *
+ * @param string $entity_type
+ * @param string $bundle_name
+ *
+ * @return array
  */
 function _exif_field_widget_retrieve_image_field_from_bundle($entity_type, $bundle_name) {
-  $fields_of_bundle = field_info_instances($entity_type,$bundle_name);
+  $fields_of_bundle = field_info_instances($entity_type, $bundle_name);
   $result = array();
   foreach ($fields_of_bundle as $key => $value) {
-    if (is_array($value) && is_array($value['widget']) && ( $value['widget']['type'] == 'image_image' || $value['widget']['type'] == 'media_generic' || $value['widget']['type'] == 'image_miw'  ) ) {
-      $result[$key] = $value['label']." (".$key.")";
+    if (is_array($value) && is_array($value['widget']) && ($value['widget']['type'] == 'image_image' || $value['widget']['type'] == 'media_generic' || $value['widget']['type'] == 'image_miw')) {
+      $result[$key] = $value['label'] . " (" . $key . ")";
     }
   }
   return $result;
 }
 
 /**
- * retrieve all field keys possible
+ * Retrieve all field keys possible.
  *
- * @return unknown_type
+ * @return array
  */
 function _exif_field_widget_retrieve_exif_fields() {
   $exif = _exif_get_class();
@@ -658,79 +784,105 @@ function _exif_field_widget_retrieve_exif_fields() {
 }
 
 /**
- * implementation of #element_validate FAPI Hook
+ * Implementation of #element_validate FAPI Hook.
  */
 function _exif_field_widget_image_field_validate($element, &$form_state) {
   $image_field_settings = $form_state['values']['instance']['widget']['settings']['image_field'];
-  if ( empty($image_field_settings) ) {
+  if (empty($image_field_settings)) {
     form_error($element, t('you must choose at least one image field to retrieve metadata.'));
   }
 
 }
 
 /**
- * implementation of #element_validate FAPI Hook
+ * Implementation of #element_validate FAPI Hook.
  */
 function _exif_field_widget_exif_field_validate($element, &$form_state) {
   $exif_field_settings = $form_state['values']['instance']['widget']['settings']['exif_field'];
-  if ( empty($exif_field_settings) ) {
-    form_error($element, t('you must choose at least one method to retrieve image metadata.'));
+  if (empty($exif_field_settings)) {
+    form_error($element, t('You must choose at least one method to retrieve image metadata.'));
   }
 }
 
 /**
- * implementation of #element_validate FAPI Hook
+ * Form API validation callback.
  */
 function _exif_field_widget_exif_field_separator_validate($element, &$form_state) {
   $exif_field_settings = $form_state['values']['instance']['widget']['settings']['exif_field_separator'];
-  if (!empty($exif_field_settings) && strlen($exif_field_settings)>1) {
+  if (!empty($exif_field_settings) && strlen($exif_field_settings) > 1) {
     form_error($element, t('the separator is only one character long.'));
   }
 }
 
-function _exif_filter_fields_on_widgets($fields_of_bundle) {
-  $result=array();
+/**
+ *
+ * @param array $fields_of_bundle
+ *
+ * @return array
+ */
+function _exif_filter_fields_on_widgets(array $fields_of_bundle) {
+  $result = array();
   foreach ($fields_of_bundle as $key => $value) {
-    if ($value['widget']['type']=='exif_readonly') {
+    if ($value['widget']['type'] == 'exif_readonly') {
       $element = array();
       if ($value['widget']['settings']['exif_field'] == 'naming_convention') {
-        $name=substr($key,6);
-      } else {
-        $name=$value['widget']['settings']['exif_field'];
+        $name = substr($key, 6);
       }
-      $element['metadata_field']=$name;
+      else {
+        $name = $value['widget']['settings']['exif_field'];
+      }
+      $element['metadata_field'] = $name;
       if (isset($value['widget']['settings']['exif_field_separator']) && !empty($value['widget']['settings']['exif_field_separator'])) {
-        $element['metadata_field_separator']=$value['widget']['settings']['exif_field_separator'];
+        $element['metadata_field_separator'] = $value['widget']['settings']['exif_field_separator'];
       }
       if (!isset($value['widget']['settings']['image_field']) && isset($value['widget']['settings']['media_generic'])) {
-        $element['image_field']=$value['widget']['settings']['media_generic'];
-      } else {
-        $element['image_field']=$value['widget']['settings']['image_field'];
+        $element['image_field'] = $value['widget']['settings']['media_generic'];
       }
-      $result[$key]=$element;
+      else {
+        $element['image_field'] = $value['widget']['settings']['image_field'];
+      }
+      $result[$key] = $element;
     }
   }
   return $result;
 }
 
+/**
+ * FormAPI error handler.
+ *
+ * @todo Is this still needed?
+ */
 function exif_field_widget_error($element, $error, $form, &$form_state) {
   form_error($element, $error['message']);
 }
 
+/**
+ * FormAPI validation callback.
+ *
+ * @todo Is this still needed?
+ */
 function exif_field_widget_validate($element, &$form_state) {
-  //DO NOT CHANGE VALIDATION.
+  // DO NOT CHANGE VALIDATION.
 }
 
 /**
- * callback function call when a element of type exif_readonly is used.
- * handler added to element_info in exif_field_widget_form.
- * handle image metadata widget fields
- * @see exif_field_widget_form
- * @param unknown_type $element
- * @param unknown_type $form_state
- * @param unknown_type $form
+ * Callback function call when a element of type exif_readonly is used.
+ *
+ * Handler added to element_info in exif_field_widget_form.
+ * Handle image metadata widget fields.
+ *
+ * @param array $element
+ *   The form element being processed.
+ * @param array $form_state
+ *   The form API state.
+ * @param array $form
+ *   The form being processed.
+ *
+ * @return array
+ *
+ * @see exif_field_widget_form()
  */
-function exif_field_readonly_widget_process($element, &$form_state, $form) {
+function exif_field_readonly_widget_process(array $element, array &$form_state, array $form) {
   $instance = field_widget_instance($element, $form_state);
   $settings = $instance['settings'];
   $widget_settings = $instance['widget']['settings'];
@@ -751,6 +903,21 @@ function exif_field_readonly_widget_process($element, &$form_state, $form) {
     '#type' => 'hidden',
     '#value' => '',
   );
-  
+
   return $element;
+}
+
+/**
+ * Determine whether a given string starts with a another string.
+ *
+ * @param string $haystack
+ *   The source string to search.
+ * @param string $needle
+ *   The string to search for.
+ *
+ * @return bool
+ *   Whether the haystack starts with the requested needle.
+ */
+function strstartswith($haystack, $needle) {
+  return substr($haystack, 0, strlen($needle)) === $needle;
 }

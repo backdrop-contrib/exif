@@ -1,6 +1,7 @@
 Exif 7.x-1.x-dev, xxxx-xx-xx
 ----------------------------
 #3273954 by DamienMcKenna: Add CHANGELOG.txt.
+#1336004 by DamienMcKenna, dman: Coding standards fixes.
 
 
 Exif 7.x-1.10, 2022-04-06

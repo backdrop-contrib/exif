@@ -1,15 +1,13 @@
-// $Id: 
-
-README file for the Exif Drupal module.
+README file for the EXIF Drupal module.
 
 
 Description
 ***********
 
-The Exif module allows to display Exif metadata on image nodes. Exif is a
+The EXIF module allows to display EXIF metadata on image nodes. EXIF is a
 specification for the image file format used by digital cameras.
 
-The metadata tags defined in the Exif standard cover a broad spectrum including [1]:
+The metadata tags defined in the EXIF standard cover a broad spectrum including:
 
  * Date and time information. Digital cameras will record the current date and
    time and save this in the metadata.
@@ -21,9 +19,9 @@ The metadata tags defined in the Exif standard cover a broad spectrum including 
    camera.
  * Descriptions and copyright information.
 
-Administrators can choose via CCK fields which Exif information are read.
+Administrators can choose via CCK fields which EXIF information are read.
 
-At this time, this module supports Exif information only with JPEG files.
+At this time, this module supports EXIF information only with JPEG files.
 
 [1] Reference: http://en.wikipedia.org/wiki/Exchangeable_image_file_format
 
@@ -32,7 +30,7 @@ Requirements
 **************
 
 CCK with at least textfields enabled.
-Exif PHP Extension enabled.
+EXIF PHP Extension enabled.
 
 
 Constraints
@@ -47,22 +45,22 @@ So Imagemagick is recommended when access to GPS data.
 
 Usage
 ************
-
-After installing it you can go to your CCK nodetype. It supports both the image module 
-aswell as the imagefield module. Let's say you have an content type "photo". Go to your
-cck settings and add a new field. For the name of the field you need to follow the following
-naming conventions:
+After installing it you can go to your content type. It supports both the image
+module as well as the imagefield module. Let's say you have an content type
+"photo". Go to your field settings and add a new field. For the name of the
+field you need to follow the following naming conventions:
 
 ### Example:
-#1 field_exif_exposuretime -> this would read the ExposureTime of the image and save it
-in this field.
+#1 field_exif_exposuretime -> this would read the ExposureTime of the image and
+save it in this field.
 
-#2 field_ifd0_datetime ->	this would read the date time (2009:01:23 08:52:43) of the image.
-as a field_type you can take for example a normal textfield, but also a date field would be
-possible.
+#2 field_ifd0_datetime ->  this would read the date time (2009:01:23 08:52:43)
+of the image. as a field_type you can take for example a normal textfield, but
+also a date field would be possible.
 
 General rule is: [field]_[section]_[name] 
 
-Under admin/settings/exif you can see a list of all possible information. These informations
-are taken from the image "sample.jpg". I may not contain all tags available. If you are looking
-for some specific tags you can just replace this image with your own image.
+Under admin/settings/exif you can see a list of all possible information. These
+informations are taken from the image "sample.jpg". I may not contain all tags
+available. If you are looking for some specific tags you can just replace this
+image with your own image.

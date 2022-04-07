@@ -1,18 +1,28 @@
 <?php
-include_once drupal_get_path('module', 'exif') .'/exif_functionaltests.php';
 
+include_once drupal_get_path('module', 'exif') . '/exif_functionaltests.php';
+
+/**
+ * Run the base tests with the Locale module disabled.
+ */
 class TestsWithDefaultEnvironmentTestCase extends ExifFunctionalTestCase {
+
+  /**
+   * {@inheritdoc}
+   */
   public function initModules() {
-    return array('exif','date');
+    return array('exif', 'date');
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public static function getInfo() {
     return array(
-      'name' => 'Exif Interface Test with default environmment (Locale module is desactivated).',
+      'name' => 'EXIF Interface Test with default environmment (Locale module is desactivated).',
       'description' => 'create node with exif metadata and ensure metadata is correctly calculated and displayed',
-      'group' => 'Exif',
+      'group' => 'exif',
     );
   }
 
 }
-?>
