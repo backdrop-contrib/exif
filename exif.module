@@ -297,6 +297,9 @@ function _exif_handle_field($index, $language, $field_type, array &$field_data, 
   elseif ($field['module'] == 'date') {
     _exif_handle_date_field($index, $language, $field, $field_type, $field_data, $exif_section, $exif_name, $exif_value);
   }
+  elseif ($field['module'] == 'number') {
+    _exif_handle_number_field($index, $language, $field, $field_type, $field_data, $exif_section, $exif_name, $exif_value);
+  }
 }
 
 /**
@@ -329,6 +332,22 @@ function _exif_handle_field_value_consistency($exif_value, array $field) {
  */
 function _exif_handle_text_field($index, $language, array $field, $field_type, array &$field_data, $exif_section, $exif_name, $exif_value) {
   $field_data[$language][$index]['value'] = _exif_handle_field_value_consistency($exif_value, $field);
+}
+
+/**
+ * Handle number field.
+ *
+ * @param int $index
+ * @param string $language
+ * @param array $field
+ * @param string $field_type
+ * @param array $field_data
+ * @param string $exif_section
+ * @param string $exif_name
+ * @param string $exif_value
+ */
+function _exif_handle_number_field($index, $language, array $field, $field_type, array &$field_data, $exif_section, $exif_name, $exif_value) {
+  $field_data[$language][$index]['value'] = $exif_value;
 }
 
 /**
@@ -609,7 +628,7 @@ function _exif_get_class() {
 function exif_field_widget_info() {
   return array(
     'exif_readonly' => array(
-      'label' => t('metadata from image'),
+      'label' => t('Metadata from image'),
       'description' => t('field content is calculated from image field in the same content type (read only)'),
       'field types' => array(
         'text',
@@ -619,6 +638,10 @@ function exif_field_widget_info() {
         'date',
         'datetime',
         'datestamp',
+        'number_integer',
+        'number_decimal',
+        'number_float',
+
       ),
       'settings' => array(
         'image_field' => '',
