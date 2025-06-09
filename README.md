@@ -60,3 +60,23 @@ Under admin/settings/exif you can see a list of all possible information. These
 informations are taken from the image "sample.jpg". I may not contain all tags
 available. If you are looking for some specific tags you can just replace this
 image with your own image.
+
+## Credits
+
+This module is based on the Exif module for Drupal, originally written by:
+
+- [David Lesieur](https://www.drupal.org/u/david-lesieur)
+
+- [Jean-Philippe Hautin](https://www.drupal.org/u/jphautin)
+
+- [damienmckenna](https://www.drupal.org/u/damienmckenna)
+
+- and others
+
+## Maintainers
+
+- seeking
+
+Ported to Backdrop by:
+
+- [Alex Höbart](https://github.com/AlexHoebart-ICPDR)
