@@ -5,10 +5,6 @@
  * Admin functionality for the EXIF module.
  */
 
-use Backdrop\exif\ExifFactory;
-
-include_once backdrop_get_path('module', 'exif') . '/ExifFactory.php';
-
 /**
  * Just some help page. Gives you an overview over the available tags.
  */

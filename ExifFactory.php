@@ -1,10 +1,5 @@
 <?php
 
-namespace Drupal\exif;
-
-include_once drupal_get_path('module', 'exif') . '/ExifPHPExtension.php';
-include_once drupal_get_path('module', 'exif') . '/SimpleExiftoolFacade.php';
-
 /**
  *
  */

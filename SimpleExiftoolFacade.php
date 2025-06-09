@@ -1,9 +1,5 @@
 <?php
 
-namespace Drupal\exif;
-
-include_once drupal_get_path('module', 'exif') . '/ExifInterface.php';
-
 /**
  * Helper class to handle the whole data processing of EXIF with exiftool.
  */

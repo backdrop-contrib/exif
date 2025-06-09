@@ -5,9 +5,6 @@
  * Primary hook implementations for the EXIF module.
  */
 
-use Backdrop\exif\ExifFactory;
-
-include_once backdrop_get_path('module', 'exif') . '/ExifInterface.php';
 
 /**
  * Implements hook_menu().
