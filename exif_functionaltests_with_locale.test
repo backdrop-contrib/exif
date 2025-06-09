@@ -1,6 +1,6 @@
 <?php
 
-include_once drupal_get_path('module', 'exif') . '/exif_functionaltests.php';
+include_once backdrop_get_path('module', 'exif') . '/exif_functionaltests.php';
 
 /**
  * Run the base tests with the Locale module disabled.

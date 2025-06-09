@@ -3,7 +3,7 @@
 /**
  *
  */
-class ExifUnitTestCase extends DrupalUnitTestCase {
+class ExifUnitTestCase extends BackdropUnitTestCase {
 
   /**
    * Define this tests.

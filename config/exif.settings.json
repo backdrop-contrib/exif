@@ -1,0 +1,12 @@
+{
+    "_config_name": "exif.settings",
+    "exif_granularity": "0",
+    "exif_nodetypes": [],
+    "exif_mediatypes": [],
+    "exif_update": true,
+    "exif_extraction_solution": "php_extensions",
+    "exif_exiftool_location": "exiftool",
+    "exif_empty_values": true,
+    "exif_vocabulary": [],
+    "date_format_exif": "Y-m-d\\TH:i:s"
+}

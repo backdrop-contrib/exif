@@ -5,15 +5,15 @@
  * Admin functionality for the EXIF module.
  */
 
-use Drupal\exif\ExifFactory;
+use Backdrop\exif\ExifFactory;
 
-include_once drupal_get_path('module', 'exif') . '/ExifFactory.php';
+include_once backdrop_get_path('module', 'exif') . '/ExifFactory.php';
 
 /**
  * Just some help page. Gives you an overview over the available tags.
  */
 function exif_admin_settings() {
-  $filepath = drupal_get_path('module', 'exif') . '/sample.jpg';
+  $filepath = backdrop_get_path('module', 'exif') . '/sample.jpg';
   $url = $filepath;
   $output = '';
   $output .= '<h3>' . t('About') . '</h3>';
@@ -56,7 +56,6 @@ function exif_admin_settings() {
   $output .= '</ul>';
   $output .= t('Please, if you want to use term reference field, ensure :');
   $output .= '<ul><li>' . t('you choose the autocompletion widget and') . '</li>';
-  ;
   $output .= '<li>' . t('the "Images" Vocabulary exist.') . '</li>';
   $output .= '</ul>';
   $output .= t('TIPS : Note for iptc and exif fields that have several values (like field iptc "keywords" as an example),');
@@ -71,7 +70,7 @@ function exif_admin_settings() {
   $output .= '</div>';
   $rows = array();
   $help = '';
-  drupal_add_css(drupal_get_path('module', 'exif') . '/exif.admin.css');
+  backdrop_add_css(backdrop_get_path('module', 'exif') . '/exif.admin.css');
   $exif = _exif_get_class();
   $fullmetadata = $exif->readMetadataTags($filepath);
   if (is_array($fullmetadata)) {
@@ -134,7 +133,9 @@ function exif_admin_settings() {
  * The form definition for the admin settings.
  */
 function exif_admin_settings_form() {
+  $config = config('exif.settings');
   $forms = array();
+  $form['#config'] = 'exif.settings';
   $forms['exif_granularity'] = array(
     '#type' => 'select',
     '#title' => t('Granularity'),
@@ -142,7 +143,7 @@ function exif_admin_settings_form() {
       t('Default'),
       t('Day'),
     ),
-    '#default_value' => variable_get('exif_granularity', 0),
+    '#default_value' => $config->get('exif_granularity'),
     '#description' => t('If a timestamp is select (for example the date the picture was taken), you can specify here how granular the timestamp should be. If you select default it will just take whatever is available in the picture. If you select Day, the Date saved will look something like 13-12-2008. This can be useful if you want to use some kind of grouping on the data.'),
   );
 
@@ -155,7 +156,7 @@ function exif_admin_settings_form() {
     '#type' => 'checkboxes',
     '#title' => t('Nodetypes'),
     '#options' => $all_nt,
-    '#default_value' => variable_get('exif_nodetypes', array()),
+    '#default_value' => $config->get('exif_nodetypes'),
     '#description' => t('Select nodetypes which should be checked for itpc & exif data. In case the nodetypes contains more than one image field, the module will use the first one.'),
   );
 
@@ -179,7 +180,7 @@ function exif_admin_settings_form() {
       '#type' => 'checkboxes',
       '#title' => t('Mediatypes'),
       '#options' => $all_mt,
-      '#default_value' => variable_get('exif_mediatypes', array()),
+      '#default_value' => $config->get('exif_mediatypes'),
       '#description' => t('Select mediatypes which should be checked for itpc & exif data.'),
     );
   }
@@ -187,7 +188,7 @@ function exif_admin_settings_form() {
   $forms['exif_update'] = array(
     '#type' => 'checkbox',
     '#title' => t('Refresh on node update'),
-    '#default_value' => variable_get('exif_update', TRUE),
+    '#default_value' => $config->get('exif_update'),
     '#description' => t('If you enable this option, EXIF data is being updated when the node is being updated.'),
   );
 
@@ -195,21 +196,21 @@ function exif_admin_settings_form() {
     '#type' => 'select',
     '#title' => t('metadata extraction solution to use on node update'),
     '#options' => ExifFactory::getExtractionSolutions(),
-    '#default_value' => variable_get('exif_extraction_solution', "php_extensions"),
+    '#default_value' => $config->get('exif_extraction_solution'),
     '#description' => t('Choose between EXIF PHP Extension or call to external tool <a href="http://www.sno.phy.queensu.ca/~phil/exiftool/">exiftool</a>.'),
   );
 
   $forms['exif_exiftool_location'] = array(
     '#type' => 'textfield',
     '#title' => t('location of exiftool binary'),
-    '#default_value' => variable_get('exif_exiftool_location', "exiftool"),
+    '#default_value' => $config->get('exif_exiftool_location'),
     '#description' => t('where is the exiftool binaries (only needed if extraction solution chosen is exiftool)'),
   );
 
   $forms['exif_empty_values'] = array(
     '#type' => 'checkbox',
     '#title' => t('Write empty image data?'),
-    '#default_value' => variable_get('exif_empty_values', TRUE),
+    '#default_value' => $config->get('exif_empty_values'),
     '#description' => t("If checked all values will be written. So for example if you want to read the creation date from EXIF, but it's not available, it will just write an empty string. If unchecked, empty strings will not be written. This might be the desired behavior, if you have a default value for the CCK field."),
   );
 
@@ -220,10 +221,10 @@ function exif_admin_settings_form() {
     $all_vocs[$item->vid] = $item->name;
   }
   $forms['exif_vocabulary'] = array(
-    '#type'    => 'select',
+    '#type' => 'select',
     '#title' => t('Vocabulary'),
     '#options' => $all_vocs,
-    '#default_value' => variable_get('exif_vocabulary', array()),
+    '#default_value' => $config->get('exif_vocabulary'),
     '#description' => t('Select vocabulary which should be used for itpc & exif data.'),
   );
 

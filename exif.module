@@ -5,9 +5,9 @@
  * Primary hook implementations for the EXIF module.
  */
 
-use Drupal\exif\ExifFactory;
+use Backdrop\exif\ExifFactory;
 
-include_once drupal_get_path('module', 'exif') . '/ExifInterface.php';
+include_once backdrop_get_path('module', 'exif') . '/ExifInterface.php';
 
 /**
  * Implements hook_menu().
@@ -33,7 +33,7 @@ function exif_menu() {
   );
   $items['admin/config/media/exif/settings'] = array(
     'title' => 'Image Metadata fields settings',
-    'page callback' => 'drupal_get_form',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('exif_admin_settings_form'),
     'access arguments' => array('administer image metadata'),
     'description' => 'Images Metadata Settings',
@@ -48,7 +48,7 @@ function exif_menu() {
  * Implements hook_help().
  */
 function exif_help($path, $arg) {
-  include_once drupal_get_path('module', 'exif') . '/exif.admin.inc';
+  include_once backdrop_get_path('module', 'exif') . '/exif.admin.inc';
   switch ($path) {
     case 'admin/help#exif':
     case 'admin/help/exif':
@@ -83,8 +83,8 @@ function _exif_node_insert_update($object_type, $object, $update = TRUE) {
     $ar_exif_fields = $exif->getMetadataFields($ar_exif_fields);
     if (!$update && property_exists($object, 'original')) {
       $original = $object->original;
-      foreach ($ar_exif_fields as $drupal_field => $metadata_field_descriptor) {
-        $field_name = $drupal_field;
+      foreach ($ar_exif_fields as $backdrop_field => $metadata_field_descriptor) {
+        $field_name = $backdrop_field;
         if (property_exists($object, $field_name) && property_exists($original, $field_name)) {
           $object->$field_name = $original->$field_name;
         }
@@ -93,8 +93,8 @@ function _exif_node_insert_update($object_type, $object, $update = TRUE) {
     else {
       $image_fields = _exif_get_image_fields($object_type, $object, $fields);
       $metadata_images_fields = _exif_get_image_fields_metadata($object_type, $object, $ar_exif_fields, $image_fields);
-      foreach ($ar_exif_fields as $drupal_field => $metadata_field_descriptor) {
-        $field_name = $drupal_field;
+      foreach ($ar_exif_fields as $backdrop_field => $metadata_field_descriptor) {
+        $field_name = $backdrop_field;
         $field_type = $fields[$field_name];
         $tmp = NULL;
         if (property_exists($object, $field_name)) {
@@ -110,7 +110,7 @@ function _exif_node_insert_update($object_type, $object, $update = TRUE) {
           $values = array();
           foreach ($metadata_images_fields[$metadata_field_descriptor['image_field']] as $metadata_image_fields) {
             if (array_key_exists($section, $metadata_image_fields)
-              && array_key_exists($key, $metadata_image_fields[$section])
+                && array_key_exists($key, $metadata_image_fields[$section])
             ) {
               $value = $metadata_image_fields[$section][$key];
               if (is_string($value) && isset($metadata_field_descriptor['metadata_field_separator'])) {
@@ -164,7 +164,7 @@ function _exif_get_image_fields_metadata($object_type, $node, array &$exif_field
     return FALSE;
   }
   $exif = _exif_get_class();
-  foreach ($exif_fields as $drupal_field => $metadata_settings) {
+  foreach ($exif_fields as $backdrop_field => $metadata_settings) {
     $field_image_name = $metadata_settings['image_field'];
     if (empty($image_fields[$field_image_name])) {
       $result[$field_image_name] = array();
@@ -183,10 +183,10 @@ function _exif_get_image_fields_metadata($object_type, $node, array &$exif_field
       // exist. Track down where this came from and work out why it's was
       // written this way; it might have just been an oversight.
       if (isset($image_descriptor['language'])) {
-        $exif_fields[$drupal_field]['language'] = $image_descriptor['language'];
+        $exif_fields[$backdrop_field]['language'] = $image_descriptor['language'];
       }
       else {
-        $exif_fields[$drupal_field]['language'] = LANGUAGE_NONE;
+        $exif_fields[$backdrop_field]['language'] = LANGUAGE_NONE;
       }
     }
   }
@@ -251,22 +251,22 @@ function _exif_get_file_uri_and_language($node, $field_image_name, $object_type)
  *   EXIF meta data.
  */
 function _exif_get_data_from_file_uri($exif, $file_uri) {
-  $metadata = &drupal_static(__FUNCTION__);
+  $metadata = &backdrop_static(__FUNCTION__);
 
   if (!isset($metadata) || !isset($metadata[$file_uri])) {
     if (stream_is_local($file_uri)) {
       // If $file_uri is a local stream pass the real path to
       // Exif::readMetadataTags().
-      $absolute_file_path = drupal_realpath($file_uri);
+      $absolute_file_path = backdrop_realpath($file_uri);
       $metadata[$file_uri] = $exif->readMetadataTags($absolute_file_path);
     }
     else {
       // If $file_uri is not a local stream copy the file to local temp file and
       // pass that file to Exif::readMetadataTags.
-      $tmp_name = drupal_tempnam(file_directory_temp(), 'exif') . '.' . pathinfo($file_uri, PATHINFO_EXTENSION);
+      $tmp_name = backdrop_tempnam(file_directory_temp(), 'exif') . '.' . pathinfo($file_uri, PATHINFO_EXTENSION);
       if (copy($file_uri, $tmp_name)) {
         $metadata[$file_uri] = $exif->readMetadataTags($tmp_name);
-        @drupal_unlink($tmp_name);
+        @backdrop_unlink($tmp_name);
       }
       else {
         // If we failed to create the temporary file make sure we at least
@@ -309,7 +309,7 @@ function _exif_handle_field($index, $language, $field_type, array &$field_data, 
  * @param array $field
  */
 function _exif_handle_field_value_consistency($exif_value, array $field) {
-  if (!drupal_validate_utf8($exif_value)) {
+  if (!backdrop_validate_utf8($exif_value)) {
     $exif_value = check_plain(utf8_encode($exif_value));
   }
   if (!empty($field['settings']['max_length'])) {
@@ -335,6 +335,17 @@ function _exif_handle_text_field($index, $language, array $field, $field_type, a
 }
 
 /**
+ * Implements hook_config_info().
+ */
+function exif_config_info() {
+  $prefixes['exif.settings'] = array(
+    'label' => t('EXIF settings'),
+    'group' => t('Configuration'),
+  );
+  return $prefixes;
+}
+
+/**
  * Handle date field.
  *
  * @param int $index
@@ -354,7 +365,7 @@ function _exif_handle_date_field($index, $language, array $field, $field_type, a
   else {
     // EXIF internal format do not handle timezone :(
     // Using website timezone instead.
-    $format = variable_get('date_format_exif', 'Y-m-d\TH:i:s');
+    $format = config_get('exif.settings', 'date_format_exif');
   }
   $date_datetime = new DateObject($exif_value, NULL, $format);
   // Change to requeted timezone.
@@ -389,7 +400,7 @@ function _exif_handle_taxonomy_field($index, $language, array $field, $field_typ
     $vocabularies = taxonomy_vocabulary_get_names();
     if (is_array($vocabularies) && isset($vocabularies[$chosen_vocabulary])) {
       $vocabulary = $vocabularies[$chosen_vocabulary];
-      $terms = taxonomy_get_term_by_name($exif_value, $chosen_vocabulary);
+      $terms = taxonomy_term_load_multiple_by_name($exif_value, $chosen_vocabulary);
       if (is_array($terms) && count($terms) > 0) {
         $term = array_shift($terms);
         $field_data[$language][$index]['tid'] = $term->tid;
@@ -398,12 +409,12 @@ function _exif_handle_taxonomy_field($index, $language, array $field, $field_typ
         // @todo make auto-creation optional even if vocabulary exist.
         // if not exist, create it
         // store full metadata in vocabulary
-        $terms = taxonomy_get_term_by_name($exif_name, $chosen_vocabulary);
+        $terms = taxonomy_term_load_multiple_by_name($exif_name, $chosen_vocabulary);
         if (is_array($terms) && count($terms) > 0) {
           $parent_term = array_shift($terms);
         }
         else {
-          $terms = taxonomy_get_term_by_name($exif_section, $chosen_vocabulary);
+          $terms = taxonomy_term_load_multiple_by_name($exif_section, $chosen_vocabulary);
           if (is_array($terms) && count($terms) > 0) {
             $section_term = array_shift($terms);
           }
@@ -450,7 +461,7 @@ function exif_field_attach_presave($obj_type, $object) {
   // Calculate the value for each metadata field so they can be stored
   // correctly.
   if ($obj_type == 'node' || $obj_type == 'file') {
-    $shouldUpdateMetadata = variable_get('exif_update', TRUE);
+    $shouldUpdateMetadata = config_get('exif.settings', 'exif_update');
     _exif_node_insert_update($obj_type, $object, $shouldUpdateMetadata);
   }
 }
@@ -490,14 +501,15 @@ function exif_date_formats() {
  * @return bool
  */
 function _exif_check_for_exif_data($node_type) {
+  $config = config('exif.settings');
   $new_types = array();
   // Fill up array with checked nodetypes.
-  foreach (variable_get('exif_nodetypes', array()) as $type) {
+  foreach ($config->get('exif_nodetypes') as $type) {
     if ($type != "0") {
       $new_types[] = $type;
     }
   }
-  foreach (variable_get('exif_mediatypes', array()) as $type) {
+  foreach ($config->get('exif_mediatypes') as $type) {
     if ($type != "0") {
       $new_types[] = $type;
     }
@@ -585,7 +597,7 @@ function _exif_get_image_fid(array $field, $language) {
  * @return \Exif
  */
 function _exif_get_class() {
-  include_once drupal_get_path('module', 'exif') . '/ExifFactory.php';
+  include_once backdrop_get_path('module', 'exif') . '/ExifFactory.php';
   $exif = ExifFactory::getExifInterface();
   return $exif;
 }
@@ -708,7 +720,7 @@ function _exif_get_field_widget_retrieve_image_field_default_value(array $widget
     }
   }
   return $result;
-};
+}
 
 /**
  * Calculate default value for settings form of widget.
@@ -723,7 +735,7 @@ function _exif_get_field_widget_retrieve_exif_field_default_value(array $widget)
     $result = 'naming_convention';
   }
   return $result;
-};
+}
 
 /**
  * Calculate default value for settings form of widget.
@@ -738,13 +750,13 @@ function _exif_get_field_widget_retrieve_exif_field_separator_default_value(arra
     $result = '';
   }
   return $result;
-};
+}
 
 /**
  * Implements hook_field_widget_form().
  */
 function exif_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  $form['#attached']['css'][] = drupal_get_path('module', 'exif') . '/exif.css';
+  $form['#attached']['css'][] = backdrop_get_path('module', 'exif') . '/exif.css';
   $element_info = element_info($field['type']);
   $element += array(
     '#type' => '#hidden',
@@ -920,4 +932,17 @@ function exif_field_readonly_widget_process(array $element, array &$form_state, 
  */
 function strstartswith($haystack, $needle) {
   return substr($haystack, 0, strlen($needle)) === $needle;
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function exif_autoload_info() {
+  return array(
+    'ExifFactory' => 'ExifFactory.php',
+    'ExifInterface' => 'ExifInterface.php',
+    'ExifPHPExtension' => 'ExifPHPExtension.php',
+    'SimpleExifToolFacade' => 'SimpleExiftoolFacade.php',
+    'ExifFunctionalTestCase' => 'exif_functionaltests.php',
+  );
 }

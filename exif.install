@@ -9,14 +9,15 @@
  * Implements hook_install().
  */
 function exif_install() {
-  variable_set('exif_update', TRUE);
+  config_set('exif.settings', 'exif_update', TRUE);
+  // Dynamically generated variable data was detected on the following lines.
 }
 
 /**
  * Implements hook_install().
  */
 function exif_uninstall() {
-  variable_del('exif_update');
+  config_clear('exif.settings', 'exif_update');
 }
 
 /**
@@ -60,4 +61,31 @@ function exif_requirements($phase) {
     }
   }
   return $requirements;
+}
+
+/**
+ * Migrate exif variables to config.
+ */
+function exif_update_1000() {
+  $config = config('exif.settings');
+  $config->set('exif_granularity', update_variable_get('exif_granularity', '0'));
+  $config->set('exif_nodetypes', update_variable_get('exif_nodetypes', array()));
+  $config->set('exif_mediatypes', update_variable_get('exif_mediatypes', array()));
+  $config->set('exif_update', update_variable_get('exif_update', TRUE));
+  $config->set('exif_extraction_solution', update_variable_get('exif_extraction_solution', 'php_extensions'));
+  $config->set('exif_exiftool_location', update_variable_get('exif_exiftool_location', 'exiftool'));
+  $config->set('exif_empty_values', update_variable_get('exif_empty_values', TRUE));
+  $config->set('exif_vocabulary', update_variable_get('exif_vocabulary', array()));
+  $config->set('date_format_exif', update_variable_get('date_format_exif', 'Y-m-d\TH:i:s'));
+  $config->save();
+
+  update_variable_del('exif_granularity');
+  update_variable_del('exif_nodetypes');
+  update_variable_del('exif_mediatypes');
+  update_variable_del('exif_update');
+  update_variable_del('exif_extraction_solution');
+  update_variable_del('exif_exiftool_location');
+  update_variable_del('exif_empty_values');
+  update_variable_del('exif_vocabulary');
+  update_variable_del('date_format_exif');
 }

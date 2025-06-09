@@ -6,7 +6,7 @@
  */
 
 /**
- * Implements hook_node_presave().
+ * Implements hook_node_presave().().
  */
 function exif_location_node_presave($node) {
   // First check if EXIF lat and long fields exist.
@@ -32,13 +32,13 @@ function exif_location_node_presave($node) {
           ),
         ),
       );
-      drupal_set_message('Node location coordinates have been set from EXIF data', 'status');
+      backdrop_set_message('Node location coordinates have been set from EXIF data', 'status');
     }
   }
 }
 
 /**
- * Implements hook_form_alter().
+ * Implements hook_form_alter().().
  */
 function exif_location_form_alter(&$form, $form_state, $form_id) {
   // @todo Is this function still needed?

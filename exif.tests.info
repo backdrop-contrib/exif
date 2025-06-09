@@ -1,0 +1,18 @@
+[TestsWithDefaultEnvironmentTestCase]
+name = EXIF Interface Test with default environmment (Locale module is desactivated).
+description = create node with exif metadata and ensure metadata is correctly calculated and displayed
+group = exif
+file = exif_functionaltests_with_defaults.test
+
+[TestsWithLocaleModuleActivatedTestCase]
+name = EXIF Interface Test with Locale module activated.
+description = create node with exif metadata and ensure metadata is correctly calculated and displayed
+group = exif
+file = exif_functionaltests_with_locale.test
+
+[ExifUnitTestCase]
+name = EXIF Unit test of Metadata functions
+description = Ensure that the exif functions properly.
+group = exif
+file = exif_unittests.test
+
