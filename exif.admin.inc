@@ -13,7 +13,7 @@ function exif_admin_settings() {
   $url = $filepath;
   $output = '';
   $output .= '<h3>' . t('About') . '</h3>';
-  $output .= '<p>' . t('The EXIF module allows you :');
+  $output .= '<p>' . t('The EXIF module allows you to:');
   $output .= '<ul><li>' . t('extract metadata from an image') . '</li>';
   $output .= '<li>' . t('to classify your images by settings terms in taxonamy vocabulary') . '</li></ul>';
   $output .= t('To classify images, you define <em>vocabularies</em> that contain related <em>terms</em>, and then assign the vocabularies to content types. For more information, see the online documentation for the <a href="@taxonomy">Taxonomy module</a>.', array('@taxonomy' => 'https://docs.backdropcms.org/documentation/taxonomy'));
@@ -45,14 +45,13 @@ function exif_admin_settings() {
   $output .= '<ul><li>' . t('<em>sub-term</em>: 200') . '</li>';
   $output .= '</ul></ul></ul></ul>';
   $output .= '<dd>' . t('To get metadata information of an image, you have to choose on which node type the extraction should be made.');
-  $output .= t('You also have to create fields with specific names using the new Field UI.');
   $output .= t('The type of the field can be :');
   $output .= '<ul><li>' . t('<em>text field</em>: extract information and put it in the text field.') . '</li>';
   $output .= '<li>' . t('<em>term reference field</em>: extract information, create terms and sub-terms if needed and put it in the field.') . '</li>';
   $output .= '</ul>';
   $output .= t('Please, if you want to use term reference field, ensure :');
   $output .= '<ul><li>' . t('you choose the autocompletion widget and') . '</li>';
-  $output .= '<li>' . t('the "Images" Vocabulary exist.') . '</li>';
+  $output .= '<li>' . t('the related Vocabulary exist.') . '</li>';
   $output .= '</ul>';
   $output .= t('TIPS : Note for iptc and exif fields that have several values (like field iptc "keywords" as an example),');
   $output .= ' ' . t('if you want to get all the values, do not forget to configure the field to use unlimited number of values (by default, set to 1).');
@@ -62,7 +61,7 @@ function exif_admin_settings() {
   $output .= '<h3 class="sample-image">';
   $output .= t('Example of field name and the metadata extracted');
   $output .= '</h3>';
-  $output .= '<img class="sample-image" src="' . $url . '"/>';
+  $output .= '<img class="sample-image" src="' . url($url) . '"/>';
   $output .= '</div>';
   $rows = array();
   $help = '';
@@ -130,9 +129,9 @@ function exif_admin_settings() {
  */
 function exif_admin_settings_form() {
   $config = config('exif.settings');
-  $forms = array();
+  $form = array();
   $form['#config'] = 'exif.settings';
-  $forms['exif_granularity'] = array(
+  $form['exif_granularity'] = array(
     '#type' => 'select',
     '#title' => t('Granularity'),
     '#options' => array(
@@ -148,21 +147,21 @@ function exif_admin_settings_form() {
   foreach ($all_nodetypes as $item) {
     $all_nt[$item->type] = $item->name;
   }
-  $forms['exif_nodetypes'] = array(
+  $form['exif_nodetypes'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Nodetypes'),
     '#options' => $all_nt,
     '#default_value' => $config->get('exif_nodetypes'),
-    '#description' => t('Select nodetypes which should be checked for itpc & exif data. In case the nodetypes contains more than one image field, the module will use the first one.'),
+    '#description' => t('Select node types which should be checked for IPTC & EXIF data. In case the node type contains more than one image field, the module will use the first one.'),
   );
 
-  if (module_exists("file_entity")) {
+  if (module_exists("file")) {
     $all_mt = array();
     // Setup media types.
-    if (function_exists('file_type_get_enabled_types')) {
-      $types = file_type_get_enabled_types();
+    if (function_exists('file_type_get_types')) {
+      $types = file_type_get_types();
       foreach ($types as $key) {
-        $all_mt[$key->type] = $key->label;
+        $all_mt[$key->type] = $key->name;
       }
     }
     elseif (function_exists('media_type_get_types')) {
@@ -172,51 +171,51 @@ function exif_admin_settings_form() {
       }
     }
 
-    $forms['exif_mediatypes'] = array(
+    $form['exif_mediatypes'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Mediatypes'),
+      '#title' => t('File types'),
       '#options' => $all_mt,
       '#default_value' => $config->get('exif_mediatypes'),
       '#description' => t('Select mediatypes which should be checked for itpc & exif data.'),
     );
   }
 
-  $forms['exif_update'] = array(
+  $form['exif_update'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Refresh on node update'),
+    '#title' => t('Refresh on update'),
     '#default_value' => $config->get('exif_update'),
-    '#description' => t('If you enable this option, EXIF data is being updated when the node is being updated.'),
+    '#description' => t('If you enable this option, EXIF data is being updated when the node or file is being updated.'),
   );
 
-  $forms['exif_extraction_solution'] = array(
+  $form['exif_extraction_solution'] = array(
     '#type' => 'select',
-    '#title' => t('metadata extraction solution to use on node update'),
+    '#title' => t('metadata extraction solution to use on update'),
     '#options' => ExifFactory::getExtractionSolutions(),
     '#default_value' => $config->get('exif_extraction_solution'),
-    '#description' => t('Choose between EXIF PHP Extension or call to external tool <a href="http://www.sno.phy.queensu.ca/~phil/exiftool/">exiftool</a>.'),
+    '#description' => t('Choose between EXIF PHP Extension or call to external tool <a href="https://exiftool.org/">exiftool</a>.'),
   );
 
-  $forms['exif_exiftool_location'] = array(
+  $form['exif_exiftool_location'] = array(
     '#type' => 'textfield',
     '#title' => t('location of exiftool binary'),
     '#default_value' => $config->get('exif_exiftool_location'),
-    '#description' => t('where is the exiftool binaries (only needed if extraction solution chosen is exiftool)'),
+    '#description' => t('Where are the exiftool binaries (only needed if extraction solution chosen is exiftool)'),
   );
 
-  $forms['exif_empty_values'] = array(
+  $form['exif_empty_values'] = array(
     '#type' => 'checkbox',
     '#title' => t('Write empty image data?'),
     '#default_value' => $config->get('exif_empty_values'),
-    '#description' => t("If checked all values will be written. So for example if you want to read the creation date from EXIF, but it's not available, it will just write an empty string. If unchecked, empty strings will not be written. This might be the desired behavior, if you have a default value for the CCK field."),
+    '#description' => t("If checked all values will be written. So for example if you want to read the creation date from EXIF, but it's not available, it will just write an empty string. If unchecked, empty strings will not be written. This might be the desired behavior, if you have a default value for the field."),
   );
 
   $all_vocabularies = taxonomy_get_vocabularies();
   $all_vocs = array();
   $all_vocs[0] = 'None';
   foreach ($all_vocabularies as $item) {
-    $all_vocs[$item->vid] = $item->name;
+    $all_vocs[$item->machine_name] = $item->name;
   }
-  $forms['exif_vocabulary'] = array(
+  $form['exif_vocabulary'] = array(
     '#type' => 'select',
     '#title' => t('Vocabulary'),
     '#options' => $all_vocs,
@@ -230,5 +229,5 @@ function exif_admin_settings_form() {
   // (title,model,keywords) and default behavior but 'promoted to front'
   // @todo Check if the media module is install to add automatically the image
   // type active and add active default exif field (title, model, keywords).
-  return system_settings_form($forms);
+  return system_settings_form($form);
 }
