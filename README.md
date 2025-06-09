@@ -1,62 +1,58 @@
-README file for the EXIF Drupal module.
+EXIF Backdrop module
+====================
 
-
-Description
-***********
+## Description
 
 The EXIF module allows to display EXIF metadata on image nodes. EXIF is a
 specification for the image file format used by digital cameras.
 
 The metadata tags defined in the EXIF standard cover a broad spectrum including:
 
- * Date and time information. Digital cameras will record the current date and
-   time and save this in the metadata.
- * Camera settings. This includes static information such as the camera model
-   and make, and information that varies with each image such as orientation,
-   aperture, shutter speed, focal length, metering mode, and film speed
-   information.
- * Location information, which could come from a GPS receiver connected to the
-   camera.
- * Descriptions and copyright information.
+* Date and time information. Digital cameras will record the current date and
+  time and save this in the metadata.
+* Camera settings. This includes static information such as the camera model
+  and make, and information that varies with each image such as orientation,
+  aperture, shutter speed, focal length, metering mode, and film speed
+  information.
+* Location information, which could come from a GPS receiver connected to the
+  camera.
+* Descriptions and copyright information.
 
-Administrators can choose via CCK fields which EXIF information are read.
+Administrators can choose via fields which EXIF information are read.
 
 At this time, this module supports EXIF information only with JPEG files.
 
 [1] Reference: http://en.wikipedia.org/wiki/Exchangeable_image_file_format
 
+## Requirements
 
-Requirements
-**************
+- Image and textfields enabled.
+- EXIF PHP Extension enabled.
 
-CCK with at least textfields enabled.
-EXIF PHP Extension enabled.
+## Constraints
 
-
-Constraints
-*************
-
-Constraints with Image Processing utility :
+Constraints with Image Processing utility:
 
 Note that, it has been reported that when using GD, it strips some fields
 (like field_gps_gpslatitude or field_gps_gpslongitude) from uploaded files.
 Imagemagick seems not to have this limitation and does not strip these fields.
 So Imagemagick is recommended when access to GPS data.
 
-Usage
-************
+## Usage
+
 After installing it you can go to your content type. It supports both the image
 module as well as the imagefield module. Let's say you have an content type
 "photo". Go to your field settings and add a new field. For the name of the
 field you need to follow the following naming conventions:
 
-### Example:
-#1 field_exif_exposuretime -> this would read the ExposureTime of the image and
-save it in this field.
+### Examples
 
-#2 field_ifd0_datetime ->  this would read the date time (2009:01:23 08:52:43)
-of the image. as a field_type you can take for example a normal textfield, but
-also a date field would be possible.
+- field_exif_exposuretime -> this would read the ExposureTime of the image and
+  save it in this field.
+
+- field_ifd0_datetime ->  this would read the date time (2009:01:23 08:52:43)
+  of the image. as a field_type you can take for example a normal textfield, but
+  also a date field would be possible.
 
 General rule is: [field]_[section]_[name] 
 
