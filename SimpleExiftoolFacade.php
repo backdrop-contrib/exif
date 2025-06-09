@@ -38,13 +38,13 @@ class SimpleExifToolFacade implements ExifInterface {
    *   A list of exif tags to read for this image.
    */
   public function getMetadataFields(array $fields = array()) {
-    foreach ($fields as $drupal_field => $metadata_settings) {
+    foreach ($fields as $backdrop_field => $metadata_settings) {
       $metadata_field = $metadata_settings['metadata_field'];
       $ar = explode('_', $metadata_field);
       if (isset($ar[0])) {
         $section = $ar[0];
         unset($ar[0]);
-        $fields[$drupal_field]['metadata_field'] = array(
+        $fields[$backdrop_field]['metadata_field'] = array(
           'section' => $section,
           'tag' => implode('_', $ar),
         );
@@ -177,7 +177,7 @@ class SimpleExifToolFacade implements ExifInterface {
    */
   public function filterMetadataTags(array $metadata, array $tag_names) {
     $info = array();
-    foreach ($tag_names as $drupal_field => $metadata_settings) {
+    foreach ($tag_names as $backdrop_field => $metadata_settings) {
       $tagName = $metadata_settings['metadata_field'];
       if (!empty($metadata[$tagName['section']][$tagName['tag']])) {
         $info[$tagName['section']][$tagName['tag']] = $metadata[$tagName['section']][$tagName['tag']];

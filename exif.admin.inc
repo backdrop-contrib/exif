@@ -16,7 +16,7 @@ function exif_admin_settings() {
   $output .= '<p>' . t('The EXIF module allows you :');
   $output .= '<ul><li>' . t('extract metadata from an image') . '</li>';
   $output .= '<li>' . t('to classify your images by settings terms in taxonamy vocabulary') . '</li></ul>';
-  $output .= t('To classify images, you define <em>vocabularies</em> that contain related <em>terms</em>, and then assign the vocabularies to content types. For more information, see the online handbook entry for the <a href="@taxonomy">Taxonomy module</a>.', array('@taxonomy' => 'http://drupal.org/handbook/modules/taxonomy/'));
+  $output .= t('To classify images, you define <em>vocabularies</em> that contain related <em>terms</em>, and then assign the vocabularies to content types. For more information, see the online documentation for the <a href="@taxonomy">Taxonomy module</a>.', array('@taxonomy' => 'https://docs.backdropcms.org/documentation/taxonomy'));
   $output .= '</p>';
   $output .= '<h3>' . t('Uses') . '</h3>';
   $output .= '<dl>';

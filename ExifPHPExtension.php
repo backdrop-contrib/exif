@@ -43,20 +43,20 @@ class ExifPHPExtension implements ExifInterface {
    */
   public function getMetadataFields(array $fields = array()) {
     $arSections = self::getMetadataSections();
-    foreach ($fields as $drupal_field => $metadata_settings) {
+    foreach ($fields as $backdrop_field => $metadata_settings) {
       $metadata_field = $metadata_settings['metadata_field'];
       $ar = explode("_", $metadata_field);
       if (isset($ar[0]) && in_array($ar[0], $arSections)) {
         $section = $ar[0];
         unset($ar[0]);
-        $fields[$drupal_field]['metadata_field'] = array(
+        $fields[$backdrop_field]['metadata_field'] = array(
           'section' => $section,
           'tag' => implode("_", $ar),
         );
       }
       else {
         // Remove from the list a non usable description.
-        unset($fields[$drupal_field]);
+        unset($fields[$backdrop_field]);
         watchdog('exif', 'Not able to understand exif field settings !field', array('!field' => $metadata_field), WATCHDOG_WARNING);
       }
     }
@@ -100,7 +100,7 @@ class ExifPHPExtension implements ExifInterface {
         if (is_string($value)) {
           $value = trim($value);
         }
-        if (!drupal_validate_utf8($value)) {
+        if (!backdrop_validate_utf8($value)) {
           $value = utf8_encode($value);
         }
         switch ($key) {
@@ -307,7 +307,7 @@ class ExifPHPExtension implements ExifInterface {
    */
   public function filterMetadataTags(array $metadata, array $tag_names) {
     $info = array();
-    foreach ($tag_names as $drupal_field => $metadata_settings) {
+    foreach ($tag_names as $backdrop_field => $metadata_settings) {
       $tagName = $metadata_settings['metadata_field'];
       if (!empty($metadata[$tagName['section']][$tagName['tag']])) {
         $info[$tagName['section']][$tagName['tag']] = $metadata[$tagName['section']][$tagName['tag']];
